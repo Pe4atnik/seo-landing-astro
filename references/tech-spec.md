@@ -1,0 +1,171 @@
+# Technical Specification — Fast SEO-Friendly Landing Pages
+
+Version 1.3 (27.08.2026)
+
+## Contents
+- 1. Performance (100/100 PageSpeed)
+- 2. HTML structure
+- 3. SEO optimization
+- 4. Security and accessibility
+- 5. CSS / fonts
+- 6. Forbidden
+- 7. Testing
+- 8. Accessibility and inclusivity
+- 9. Embedded video (facade pattern only)
+- 10. Typical blocks without speed loss
+- 11. Deferred widgets
+- Output requirements
+
+Create a static HTML site focused on maximum performance and SEO.
+
+## 1. PERFORMANCE (100/100 PageSpeed)
+- **LCP target**: <2.5s (hero image or H1)
+- **INP target**: <100ms (minimize JS on the first screen)
+- **CLS target**: <0.1 (fixed dimensions for all elements, including fonts)
+- Inline ALL critical CSS in `<style>` inside `<head>` (only first-screen styles)
+- First screen = header + hero + CTA (up to 800px height on desktop, 70vh on smartphones)
+- Critical CSS must include ONLY the styles of these blocks
+- Load below-the-fold CSS asynchronously: `<link rel="stylesheet" href="styles.css" media="print" onload="this.media='all'">`
+- ALL images: AVIF with WebP/JPEG fallback via `<picture>`, lazy loading, `decoding="async"`, numeric width/height in pixels on every image
+- Use `srcset` and `sizes` on all `<img>`
+- Calculate `sizes` from the container max-width
+- Responsive breakpoints: 320, 640, 768, 1024, 1280, 1920
+- Blur placeholder or LQIP (Low Quality Image Placeholder)
+- `aspect-ratio` in CSS to prevent layout shift
+- `speakable` markup for voice search (optional — only for news/recipe-type pages)
+- Static assets: `Cache-Control: public, max-age=31536000, immutable`
+- HTML: `max-age=0, must-revalidate`
+- Server instructions must specify Brotli (br) preferred, gzip fallback
+- Preload the LCP image: `<link rel="preload" as="image" href="hero.webp" fetchpriority="high">`
+- Add `fetchpriority="high"` to the main image
+- ALL scripts (if any) must have the `defer` attribute and be placed before `</body>`
+- Absolute paths for ALL resources: `src="https://site.com/images/photo.webp"`
+
+## 2. HTML STRUCTURE
+- Clean semantic HTML5: `<header>`, `<nav>`, `<main>`, `<article>`, `<section>`, `<footer>`
+- One responsive HTML, no duplicate content (mobile/desktop)
+- Heading hierarchy: one H1, then H2–H6 by logic
+- Language tag matching the content: `<html lang="en-US">` or equivalent
+- Viewport: `<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">`
+- Minify HTML, CSS and JS files: remove comments and extra whitespace
+
+## 3. SEO OPTIMIZATION
+- Meta tags:
+  - `<title>Unique keyword title up to 60 characters</title>`
+  - `<meta name="description" content="Unique keyword description up to 160 characters">`
+  - `<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">`
+  - `<link rel="canonical" href="https://site.com/">`
+- Open Graph: og:title, og:description, og:image, og:type, og:url, og:locale (plus og:image:width, og:image:height, og:image:alt)
+- Twitter card: twitter:card, twitter:title, twitter:description, twitter:image
+- JSON-LD structured data (at the end of body):
+  - `@type: WebSite` + `Organization`/`LocalBusiness` (with GEO data: address, phone, coordinates)
+  - `@type: BreadcrumbList`
+  - If such content blocks exist, add `FAQPage` and review markup
+  - All URLs absolute, `@id` specified
+
+## 4. SECURITY AND ACCESSIBILITY
+- `<meta name="referrer" content="strict-origin-when-cross-origin">`
+- Security headers (in the .htaccess instructions):
+  - `X-Content-Type-Options: nosniff`
+  - `X-Frame-Options: DENY`
+  - `Permissions-Policy: camera=(), microphone=(), geolocation=()`
+- Accessibility: aria attributes on interactive elements
+- Title and alt mandatory for all images, matching the block name and number within the block when there are several images
+- Wrap all external links: `<a href="https://example.com" target="_blank" rel="noopener noreferrer">External site</a>`
+- All file links and external links must use HTTPS
+
+## 5. CSS / FONTS
+- ONLY system fonts: `font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Helvetica Neue", Arial, sans-serif;`
+- Forbidden: external fonts, `font-display: swap`, Google Fonts
+- CLS prevention:
+  - `* { box-sizing: border-box; }`
+  - `img { max-width: 100%; height: auto; display: block; }`
+  - `.container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 15px; }`
+
+## 6. FORBIDDEN
+- External JS libraries (jQuery, React, Vue, etc.)
+- External CSS frameworks (Bootstrap, Tailwind)
+- SVG images
+- External fonts
+- iframe (exceptions: maps — only with `loading="lazy"`; YouTube video — only via the facade pattern, see §9)
+- `document.write()`, synchronous scripts
+
+## 7. TESTING
+- Valid HTML per W3C
+- Correct display at all sizes from 320px to 1920px
+- Support for all modern browsers
+
+## 8. ACCESSIBILITY AND INCLUSIVITY
+- WCAG 2.1 Level AA compliance
+- Text contrast ratio at least 4.5:1
+- `prefers-reduced-motion` support
+- All interactive elements keyboard accessible
+
+## 9. EMBEDDED VIDEO (facade pattern only)
+- Forbidden to load a YouTube iframe on page load — only on user click.
+- Before the click show ONLY the video cover:
+  - `<picture>` with a local cover in AVIF/WebP + JPEG fallback (no hotlinking from i.ytimg.com — extra domain, blocked by ad blockers);
+  - numeric width/height + CSS `aspect-ratio: 16/9` (CLS prevention);
+  - `loading="lazy"`, `decoding="async"`, srcset/sizes per §1 rules.
+- Play button over the cover:
+  - a real `<button>` (not a div), keyboard accessible (Enter/Space);
+  - `aria-label="Watch video: <title>"`;
+  - play icon — CSS only (no SVG, forbidden) or a raster image;
+  - visible `:focus-visible`.
+- On click/Enter remove the cover and button, insert an `<iframe>` in their place:
+  - `src="https://www.youtube-nocookie.com/embed/<ID>?autoplay=1"` (privacy-enhanced mode);
+  - `title="Video title"` (mandatory for accessibility);
+  - `loading="lazy"`, `allowfullscreen`;
+  - `allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"`;
+  - move focus to the iframe after insertion.
+- Add preconnect to https://www.youtube-nocookie.com only on hover over the cover (handler in the script), never in `<head>`.
+- All pattern scripts — in one file with `defer` before `</body>`, no external libraries; for multiple videos use one delegated handler.
+- If a video is actually on the page, add `@type: VideoObject` markup (name, description, thumbnailUrl, uploadDate, embedUrl) to JSON-LD.
+- Reference implementation: [video-facade.md](./video-facade.md)
+
+## 10. TYPICAL BLOCKS WITHOUT SPEED LOSS
+- FAQ / accordion: `<details>/<summary>` — 0 bytes of JS, content immediately in the DOM (good for AEO).
+- Slider / carousel: CSS `scroll-snap` — native swipe scroll, no JS libraries.
+- Tabs: CSS-only (radio inputs) or ~15 lines of JS; content of all tabs always in the DOM.
+- Modal window: native `<dialog>`, opened on click, loads nothing on start.
+- Map: facade like video (§9) — map screenshot, iframe on click.
+- Reviews: static HTML + `Review`/`AggregateRating` in JSON-LD, no widgets.
+- Form: native validation (`required`, `type="email"`), honeypot field against spam, no external form builders.
+- Scroll counters and animations: one `IntersectionObserver` in the common script; animations only via `transform`/`opacity`.
+- Sticky header: `position: sticky` — pure CSS, no JS listeners.
+- Back-to-top button: anchor link or 5 lines of JS.
+- General rules:
+  - total page JS budget ≤ 15 KB, one file, `defer` before `</body>`;
+  - one delegated handler for all interactivity;
+  - 1 block = 0 external requests: no block may pull a script/style/widget from a third-party domain;
+  - content always in the DOM: load on click only heavy media (video, maps);
+  - forbidden on first load: third-party widgets, scroll-jacking, JS parallax.
+
+## 11. DEFERRED WIDGETS (online chats, subscription popups, cookie banners)
+- Forbidden to load their scripts/styles on first load — async only.
+- Initialization strictly 1 second after the DOMContentLoaded event:
+
+```javascript
+document.addEventListener('DOMContentLoaded', function () {
+  setTimeout(function () { /* dynamically create <script> or insert the widget */ }, 1000);
+});
+```
+
+- Insert widget scripts dynamically (`createElement` + `appendChild`) with async/defer attributes, never as a static tag in `<head>`.
+- Cookie banner: own block (~20 lines of CSS + 5 lines of JS for localStorage), no third-party services; show only if consent has not been given yet.
+- Online chat and subscription popup: if it is a third-party service — load its script only per the rule above; the widget container must not reserve space before loading (no CLS).
+- All deferred widgets: keyboard accessible, closable with Esc, have aria attributes and visible `:focus-visible`.
+- Popups must not cover first-screen content and must not shift the layout.
+
+## OUTPUT
+Generate the complete HTML code complying with ALL points above.
+
+BEFORE OUTPUTTING THE CODE:
+- Check compliance with every checklist item
+- If a violation is found — fix it
+- Do not mention the verification process in the final answer
+
+AFTER OUTPUTTING THE HTML CODE, briefly list:
+- LCP parameters
+- PageSpeed score
+- schema.org types used in the code
