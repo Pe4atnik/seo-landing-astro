@@ -1,6 +1,6 @@
-# SEO-Skill — Fast SEO Landing Page Generator
+# SEO Landing
 
-A skill that generates static HTML landing pages focused on **100/100 PageSpeed** and maximum SEO: critical CSS, AVIF images, full schema.org markup, native interactivity with zero third-party dependencies.
+An agent skill that builds and updates landing pages to hit **100/100 PageSpeed**, pass **Google Core Web Vitals**, and get the technical SEO right. Static HTML, critical CSS, AVIF images, full schema.org markup, zero third-party dependencies.
 
 Format — [Agent Skills](https://agentskills.io) (open standard originally developed by Anthropic): works in VS Code Copilot, Claude Code, OpenAI Codex, Google Antigravity, Cursor, Gemini CLI, OpenClaw, Hermes, and other compatible agents.
 
