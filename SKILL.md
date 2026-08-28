@@ -1,0 +1,72 @@
+---
+name: seo-landing
+description: "Generates fast, SEO-optimized static HTML landing pages targeting 100/100 PageSpeed (LCP < 2.5s, INP < 100ms, CLS < 0.1), full schema.org JSON-LD, AVIF images, critical CSS, zero external dependencies. Use when: user asks to create/build/generate a landing page, one-pager, or static site with focus on SEO, speed, or PageSpeed; asks for an SEO-friendly page from a brief/ТЗ; or asks to audit/fix a landing against a performance checklist."
+metadata:
+  argument-hint: "[topic/domain or brief]"
+---
+
+# SEO Landing Generator
+
+Builds a static single-page HTML landing optimized for 100/100 PageSpeed and maximum SEO: critical CSS, AVIF images, full JSON-LD structured data, native-only interactivity, zero third-party requests on first load.
+
+## When to Use
+- User asks for a landing page / one-pager focused on speed and SEO.
+- User provides a brief (ТЗ) and wants a production-ready static page.
+- User asks to audit or fix an existing landing against the performance checklist.
+
+## Procedure
+
+### 0. Collect the brief (ask if missing)
+Required before generating anything:
+- Domain / final URL — for canonical, og:url, absolute paths, JSON-LD `@id`.
+- Page language and locale — for `lang` and `og:locale`.
+- Topic + 1–3 target keywords — for H1, title, description.
+- Business type: Organization or LocalBusiness; for LocalBusiness also address, phone, geo coordinates.
+- CTA and contacts (phone, form, messengers).
+- Whether images are provided; whether FAQ / reviews / video blocks are needed.
+
+If domain or keywords are missing — ask first, do not invent them.
+
+### 1. Create the project folder
+Every project lives in its own folder inside the workspace — **never write to the workspace root**:
+
+```
+<workspace>/<project-slug>/
+  index.html        # the generated landing page
+  images/           # local assets (AVIF/WebP/JPEG)
+  robots.txt
+  sitemap.xml
+  SERVER-SETUP.md   # hosting instructions
+```
+
+### 2. Generate the page
+Build `index.html` strictly following [references/tech-spec.md](./references/tech-spec.md) — 11 requirement sections (performance, HTML structure, SEO, security, CSS/fonts, forbidden list, testing, accessibility, embedded video, typical blocks, deferred widgets).
+
+For embedded YouTube video use the facade pattern only: rules in tech-spec §9, reference implementation in [references/video-facade.md](./references/video-facade.md).
+
+### 3. Generate companion files
+- `robots.txt` and `sitemap.xml` (with `lastmod`).
+- Hosting instructions from [references/server-config.md](./references/server-config.md): caching, Brotli/gzip, security headers.
+
+### 4. STOP POINT — user approval
+Show the generated page to the user and ask explicitly whether the HTML version is OK. **Do not proceed to validation and the final report until the user confirms.** If there are remarks — fix and ask again.
+
+### 5. Validate
+- W3C HTML validity.
+- JSON-LD via a schema.org validator.
+- Lighthouse / PageSpeed: performance, SEO, accessibility, best-practices.
+
+Fix any violations found before reporting. Do not mention the verification process in the final answer.
+
+### 6. Final report
+Briefly list:
+- LCP parameters
+- PageSpeed score
+- schema.org types used in the code
+
+## Main pitfalls
+- Never use external JS/CSS libraries, external fonts, or SVG images (tech-spec §6).
+- Never load YouTube iframes, maps, chats, subscription popups, or cookie banners on first load (tech-spec §9, §11).
+- All content must exist in raw HTML — nothing rendered only by JS.
+- Absolute URLs in JSON-LD, canonical, and OG tags.
+- Total JS budget ≤ 15 KB, one file, `defer` before `</body>`.
