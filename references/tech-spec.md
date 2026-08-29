@@ -69,7 +69,8 @@ Create a static HTML site focused on maximum performance and SEO.
 - Open Graph: og:title, og:description, og:image, og:type, og:url, og:locale (plus og:image:width, og:image:height, og:image:alt)
 - Twitter card: twitter:card, twitter:title, twitter:description, twitter:image
 - JSON-LD structured data (at the end of body):
-  - `@type: WebSite` + `Organization`/`LocalBusiness` (with GEO data: address, phone, coordinates)
+  - `@type: WebSite` (with `name` and the canonical root `url`) only on the domain or subdomain home page, consistent with visible branding; omit it for subdirectory landings when the root home page is outside this project's scope. Never invent a site identity or use a subdirectory URL as the WebSite root.
+  - `Organization`/`LocalBusiness` (with GEO data: address, phone, coordinates)
   - `LocalBusiness` only when the verified identity facts exist: public/legal business name, complete structured postal address (street, locality, region, postal code, country), phone. Never invent identity data — fall back to `Organization` markup or omit entity markup when required facts are unavailable. Validate required properties against the current Google LocalBusiness structured-data documentation, not only schema.org syntax.
   - Emit the most specific truthful `LocalBusiness` subtype based on the actual business (e.g. `Restaurant`, `Dentist`), not target keywords; use an `@type` array only when multiple genuine types apply. Omit `LocalBusiness` markup entirely when no physical location exists. Validate the chosen type/property combination with Rich Results Test and Schema Markup Validator.
   - `@type: BreadcrumbList`
