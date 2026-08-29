@@ -147,7 +147,7 @@ Create a static HTML site focused on maximum performance and SEO.
 
 ## 10. TYPICAL BLOCKS WITHOUT SPEED LOSS
 - FAQ / accordion: `<details>/<summary>` — 0 bytes of JS, content immediately in the DOM (good for AEO).
-- Slider / carousel: CSS `scroll-snap` — native swipe scroll, no JS libraries.
+- Slider / carousel: prefer a plain linear list when horizontal interaction is not essential. When the result is a carousel (W3C APG carousel pattern), CSS `scroll-snap` may serve as the scrolling mechanism, but the carousel additionally needs: a labeled container, named slides, native previous/next `<button>` controls (a few `scrollBy` lines in the common script), and keyboard traversal between slides. Auto-rotation is forbidden by default; if explicitly enabled, add a stop/start control first in tab order and stop rotation whenever focus enters the carousel. Test keyboard-only, touch, screen-reader, and 320px behavior.
 - Tabs: CSS-only (radio inputs) or ~15 lines of JS; content of all tabs always in the DOM.
 - Modal window: native `<dialog>`, opened on click, loads nothing on start.
 - Map: facade like video (§9) — map screenshot, iframe on click.
