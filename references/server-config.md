@@ -13,6 +13,13 @@ Include these instructions in the project's `SERVER-SETUP.md`.
   AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json image/svg+xml
 </IfModule>
 
+# Mark compressed responses so caches vary on Accept-Encoding
+<IfModule mod_headers.c>
+  <FilesMatch "\.(html|css|js|json|svg)$">
+    Header append Vary "Accept-Encoding"
+  </FilesMatch>
+</IfModule>
+
 # Caching
 <IfModule mod_expires.c>
   ExpiresActive On
@@ -54,7 +61,11 @@ AddDefaultCharset utf-8
 brotli on;
 brotli_types text/html text/css application/javascript application/json image/svg+xml;
 gzip on;
+gzip_vary on;
 gzip_types text/html text/css application/javascript application/json image/svg+xml;
+# ngx_brotli does not add Vary itself; if Brotli is served, ensure responses
+# carry exactly one Vary: Accept-Encoding (e.g. via a map on $http_accept_encoding
+# or CDN rules) without duplicating the value gzip_vary already adds.
 
 location ~* \.(avif|webp|jpg|jpeg|png|css|js)$ {
   add_header Cache-Control "public, max-age=31536000, immutable";
@@ -75,6 +86,7 @@ add_header Referrer-Policy "strict-origin-when-cross-origin" always;
 
 ## Checklist
 - [ ] Brotli enabled (verify `Content-Encoding: br`), gzip as fallback
+- [ ] Compressed responses carry `Vary: Accept-Encoding`; identity, gzip and Brotli requests each get the right `Content-Encoding` (verify at origin and through any CDN)
 - [ ] Static assets cached 1 year with `immutable`
 - [ ] HTML revalidated on every request
 - [ ] All four security headers present
