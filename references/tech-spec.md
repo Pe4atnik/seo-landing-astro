@@ -135,7 +135,7 @@ Create a static HTML site focused on maximum performance and SEO.
   - move focus to the iframe after insertion.
 - Add preconnect to https://www.youtube-nocookie.com only on hover over the cover (handler in the script), never in `<head>`.
 - All pattern scripts — in one file with `defer` before `</body>`, no external libraries; for multiple videos use one delegated handler.
-- If a video is actually on the page, add `@type: VideoObject` markup (name, description, thumbnailUrl, uploadDate, embedUrl) to JSON-LD.
+- If a video is actually on the page, add `@type: VideoObject` markup (name, description, thumbnailUrl, uploadDate, embedUrl) to JSON-LD — only when all required facts are collected and source-backed: the video URL/ID, title, description, accurate ISO-8601 `uploadDate` with timezone, and a unique crawlable thumbnail (plus `contentUrl` when applicable). Never invent media facts; users must be able to watch that specific video on the page. Validate with Rich Results Test and verify the thumbnail returns 200.
 - Reference implementation: [video-facade.md](./video-facade.md)
 
 ## 10. TYPICAL BLOCKS WITHOUT SPEED LOSS
