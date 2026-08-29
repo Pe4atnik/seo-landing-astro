@@ -75,6 +75,7 @@ Create a static HTML site focused on maximum performance and SEO.
   - Emit the most specific truthful `LocalBusiness` subtype based on the actual business (e.g. `Restaurant`, `Dentist`), not target keywords; use an `@type` array only when multiple genuine types apply. Omit `LocalBusiness` markup entirely when no physical location exists. Validate the chosen type/property combination with Rich Results Test and Schema Markup Validator.
   - `@type: BreadcrumbList` only when a real site hierarchy exists: collect the visible breadcrumb trail and canonical parent URLs, require at least two truthful ordered `ListItem` entries, and keep the JSON-LD consistent with user-visible navigation. Omit `BreadcrumbList` for a standalone landing without a real hierarchy rather than inventing parent pages.
   - If a visible, complete FAQ content block exists, add `FAQPage` markup. Distinguish schema.org validity from Google rich-result eligibility: Google currently shows FAQ rich results regularly only for well-known authoritative government and health sites, and valid markup never guarantees display. Keep or omit the markup intentionally based on the user's goals, and never report it as an achieved rich-result benefit.
+  - `Review`/`AggregateRating` markup is forbidden for the represented Organization/LocalBusiness itself (self-serving ratings are ineligible for LocalBusiness rich results). Emit review markup only for an eligible reviewed entity with collected facts: reviewed entity, author, date, source, rating scale and count — and only when every rating is visible on the page exactly as marked up. Omit rating markup when eligibility or source authenticity is not established.
   - All URLs absolute, `@id` specified
 
 ## 4. SECURITY AND ACCESSIBILITY
@@ -143,7 +144,7 @@ Create a static HTML site focused on maximum performance and SEO.
 - Tabs: CSS-only (radio inputs) or ~15 lines of JS; content of all tabs always in the DOM.
 - Modal window: native `<dialog>`, opened on click, loads nothing on start.
 - Map: facade like video (§9) — map screenshot, iframe on click.
-- Reviews: static HTML + `Review`/`AggregateRating` in JSON-LD, no widgets.
+- Reviews: static HTML, no widgets. `Review`/`AggregateRating` JSON-LD only under the §3 gates: never self-serving for the represented business, only source-backed facts, visible-page parity.
 - Form: native validation (`required`, `type="email"`), honeypot field against spam, no external form builders.
 - Scroll counters and animations: one `IntersectionObserver` in the common script; animations only via `transform`/`opacity`.
 - Sticky header: `position: sticky` — pure CSS, no JS listeners.
