@@ -39,6 +39,7 @@ Every project lives in its own folder inside the workspace — **never write to 
   index.html        # the generated landing page
   images/           # local assets (AVIF/WebP/JPEG)
   favicon.png       # stable square brand icon, ≥48×48
+  ASSETS.md         # rights & provenance record for every asset
   robots.txt
   sitemap.xml
   SERVER-SETUP.md   # hosting instructions

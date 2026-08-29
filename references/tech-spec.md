@@ -1,11 +1,12 @@
 # Technical Specification — Fast SEO-Friendly Landing Pages
 
-Version 1.4 (29.08.2026)
+Version 1.5 (29.08.2026)
 
 The README footer must declare the same specification version and date —
 verify with `scripts/check-spec-version.sh` (fails when they diverge).
 
 ## Change record
+- **1.5 (29.08.2026)** — truthfulness and provenance: verified LocalBusiness identity and most-specific subtype (#15, #44); WebSite only on the domain/subdomain home page (#35); BreadcrumbList only with a real hierarchy (#22); FAQPage eligibility limits (#23); Review/AggregateRating gated to eligible source-backed cases (#16); Speakable restricted to its beta news eligibility (#21); VideoObject only from collected media facts (#36); crawlable favicon in the output contract (#38); truthful sitemap/robots discovery contract (#37); source-backed marketing claims (#42); asset rights and provenance manifest (#43).
 - **1.4 (29.08.2026)** — canonical workflow order with stop point before validation (#24); mandatory `<meta charset="utf-8">` and UTF-8 Content-Type (#30); CSP/no-JS-safe deferred CSS (#31); `Vary: Accept-Encoding` for compressed responses (#28).
 - **1.3 (27.08.2026)** — initial published revision.
 
@@ -183,6 +184,7 @@ document.addEventListener('DOMContentLoaded', function () {
 - Every objective claim in the generated copy must trace back to approved source material collected in the brief, with an identified claim owner. Self-check before the stop point: list each objective claim and its source; a claim without a source is requested from the user or omitted — never silently filled with generated copy.
 - Health, financial, legal and other sensitive claims additionally require an identified subject-matter or legal reviewer appropriate to the target jurisdiction before publication.
 - When evidence is missing, report a blocker instead of publishing unsupported claims.
+- Image rights and provenance: for every asset used on the page (photos, logos, video covers, and all generated derivatives such as AVIF/WebP conversions) record in an `ASSETS.md` manifest: creator/rightsholder, source, license or permission, allowed reproduction/adaptation, attribution, territory, and expiry where applicable. Public availability of an image is not permission to copy or transform it — exclude or replace assets whose clearance is unavailable. Every generated derivative must link back to its provenance record. The manifest records supplied rights assertions and does not replace jurisdiction-specific legal advice.
 
 ## OUTPUT — canonical workflow order
 Generate the complete HTML code complying with ALL points above.
