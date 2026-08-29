@@ -120,6 +120,7 @@ Create a static HTML site focused on maximum performance and SEO.
 ## 8. ACCESSIBILITY AND INCLUSIVITY
 - WCAG 2.1 Level AA compliance
 - Text contrast ratio at least 4.5:1
+- Non-text contrast at least 3:1 against adjacent colors (WCAG SC 1.4.11) for control boundaries, state indicators, focus indicators, and meaningful graphics needed to identify components or states. Validate the default, hover, `:focus-visible`, selected/expanded, error, and disabled states as applicable; record an exception only where the WCAG criterion itself excludes the component or state.
 - `prefers-reduced-motion` support covers every permitted animation: gate nonessential CSS/JS animation behind `@media (prefers-reduced-motion: no-preference)` or provide a `reduce` branch that disables/replaces it. In reduced mode render final counter values without animated counting, avoid smooth/programmatic scrolling, and keep functional state cues that do not rely on motion. Test the reduced preference across every optional animation and interactive state.
 - All interactive elements keyboard accessible
 
