@@ -45,6 +45,9 @@ Include these instructions in the project's `SERVER-SETUP.md`.
 AddDefaultCharset utf-8
 <IfModule mod_mime.c>
   AddCharset utf-8 .html .css .js .xml .json
+  # Fallbacks for hosts whose MIME map lacks modern image types
+  AddType image/avif .avif
+  AddType image/webp .webp
 </IfModule>
 
 <IfModule mod_headers.c>
@@ -298,6 +301,48 @@ curl -I 'https://site.com/'   # Header present exactly once
 curl -I 'http://site.com/'    # Header ABSENT on the redirect response
 ```
 
+## MIME types — every generated resource class must be served correctly
+
+With `X-Content-Type-Options: nosniff` enabled, a wrong `Content-Type` is an
+operational failure (browsers refuse mistyped CSS/JS), and wrong XML/image
+types can impair crawling and rendering. Expected types for everything this
+skill generates:
+
+| Resource | Content-Type |
+|---|---|
+| HTML page | `text/html; charset=utf-8` |
+| CSS | `text/css; charset=utf-8` |
+| JavaScript | `application/javascript; charset=utf-8` (or `text/javascript`) |
+| AVIF | `image/avif` |
+| WebP | `image/webp` |
+| JPEG | `image/jpeg` |
+| PNG | `image/png` |
+| robots.txt | `text/plain; charset=utf-8` |
+| sitemap.xml | `application/xml; charset=utf-8` (or `text/xml`) |
+
+Nginx: the default `mime.types` is pulled in by the stock `http` block —
+verify it is included (`include mime.types;` or the distro default) and that
+`default_type` is not masking anything. Current `mime.types` already maps
+avif/webp; on older releases add the missing entries explicitly in the `http`
+block:
+
+```nginx
+types {
+  image/avif avif;
+  image/webp webp;
+}
+```
+
+Apache: `mod_mime` is required, and `.htaccess` `AddType` only takes effect
+when the directory permits overrides (`AllowOverride` — see below). The main
+`.htaccess` block above already carries the `AddType` fallbacks for hosts
+whose map lacks avif/webp.
+
+Verification — deployed `curl -I` for every generated resource class (HTML,
+one `.css`, one `.js`, each image format actually used, `robots.txt`,
+`sitemap.xml`); a missing or incorrect `Content-Type` fails deployment
+verification.
+
 ## Checklist
 - [ ] Config syntax check passes BEFORE reload: `nginx -t` (Nginx) or `apachectl configtest` (Apache)
 - [ ] Compression state recorded honestly: Brotli module installed and loaded (Nginx: package name / `load_module` lines documented; Apache: `mod_brotli` present). If not installed — the Brotli lines are removed and this is marked gzip-only, never silently skipped
@@ -311,3 +356,4 @@ curl -I 'http://site.com/'    # Header ABSENT on the redirect response
 - [ ] HTTPS enforced: TLS certificate installed, HTTPS endpoint serves the site, and a port-80 vhost/server block issues exactly one 301/308 preserving host/path/query to the canonical host. Verify deployed: `curl -I 'http://<host>/path?q=1'` returns the single redirect to the expected HTTPS URL, and the HTTPS request succeeds
 - [ ] HSTS deployed in stages: short `max-age` first, long lifetime only after clean rollout; header present exactly once on HTTPS responses and absent on the HTTP redirect (verify with `curl -I`); `includeSubDomains` only when every subdomain is HTTPS-capable; `preload` only with the user's explicit recorded consent. HSTS supplements, never replaces, the HTTP→HTTPS redirect
 - [ ] HTML responses carry `Content-Type: text/html; charset=utf-8` (verify with `curl -I`); `<meta charset="utf-8">` present within the first 1024 bytes; representative non-ASCII text, metadata and JSON-LD render correctly
+- [ ] MIME types verified with deployed `curl -I` for every generated resource class (CSS, JS, each image format used, robots.txt, sitemap.xml) against the expected-type table; Nginx `mime.types` included (avif/webp mapped) or Apache `AddType` fallbacks in place — an absent or wrong `Content-Type` fails verification
