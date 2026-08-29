@@ -256,6 +256,48 @@ add_header Content-Security-Policy-Report-Only "<generated policy>" always;
 # add_header Content-Security-Policy "<generated policy>" always;
 ```
 
+## Strict-Transport-Security (HSTS) — HTTPS only, staged rollout
+
+HSTS (RFC 6797) makes browsers upgrade later HTTP attempts before sending
+them and blocks certificate-warning bypass. It SUPPLEMENTS the #12 redirect —
+it never replaces it (the very first request still needs the redirect).
+
+Rollout rules:
+- Emit the header ONLY on HTTPS responses — never on the port-80 redirect
+  response (browsers ignore it there, and a misconfigured HTTP copy can poison
+  caches).
+- Start with a short `max-age` (e.g. 300 seconds). Adopt the long lifetime
+  (e.g. `max-age=31536000`) only after the HTTPS deployment runs cleanly.
+- Add `includeSubDomains` only when EVERY applicable subdomain serves HTTPS.
+- `preload` (hstspreload.org submission) is an explicit, warned opt-in: it is
+  hard to undo and affects every browser's preload list — record the user's
+  explicit decision before adding it.
+
+Apache — inside the HTTPS virtual host only (NOT in the port-80 vhost):
+
+```apache
+# Phase 1: short trial
+Header always set Strict-Transport-Security "max-age=300"
+# Phase 2 (after clean rollout):
+# Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+```
+
+Nginx — inside the `listen 443 ssl` server block only (NOT in the port-80
+block):
+
+```nginx
+# Phase 1: short trial
+add_header Strict-Transport-Security "max-age=300" always;
+# Phase 2 (after clean rollout):
+# add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+```
+
+Verification:
+```bash
+curl -I 'https://site.com/'   # Header present exactly once
+curl -I 'http://site.com/'    # Header ABSENT on the redirect response
+```
+
 ## Checklist
 - [ ] Config syntax check passes BEFORE reload: `nginx -t` (Nginx) or `apachectl configtest` (Apache)
 - [ ] Compression state recorded honestly: Brotli module installed and loaded (Nginx: package name / `load_module` lines documented; Apache: `mod_brotli` present). If not installed — the Brotli lines are removed and this is marked gzip-only, never silently skipped
@@ -267,4 +309,5 @@ add_header Content-Security-Policy-Report-Only "<generated policy>" always;
 - [ ] All four security headers present on every response class — verify with `curl -I` against `/`, a `.css` file, a `.js` file, and a nonexistent URL (404); each response carries exactly one copy of all four headers (no duplicates, none missing on error responses or Nginx asset locations)
 - [ ] CSP generated for this page's exact feature set; deployed report-only first, browser-tested across every feature combination with zero unexpected violations, then enforced; no `unsafe-inline`/`unsafe-eval` in `script-src`; `youtube-nocookie.com` present in `frame-src`/`connect-src` only when the video block exists
 - [ ] HTTPS enforced: TLS certificate installed, HTTPS endpoint serves the site, and a port-80 vhost/server block issues exactly one 301/308 preserving host/path/query to the canonical host. Verify deployed: `curl -I 'http://<host>/path?q=1'` returns the single redirect to the expected HTTPS URL, and the HTTPS request succeeds
+- [ ] HSTS deployed in stages: short `max-age` first, long lifetime only after clean rollout; header present exactly once on HTTPS responses and absent on the HTTP redirect (verify with `curl -I`); `includeSubDomains` only when every subdomain is HTTPS-capable; `preload` only with the user's explicit recorded consent. HSTS supplements, never replaces, the HTTP→HTTPS redirect
 - [ ] HTML responses carry `Content-Type: text/html; charset=utf-8` (verify with `curl -I`); `<meta charset="utf-8">` present within the first 1024 bytes; representative non-ASCII text, metadata and JSON-LD render correctly

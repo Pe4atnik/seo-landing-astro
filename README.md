@@ -83,7 +83,7 @@ seo-landing/
 - **Images**: AVIF → WebP → JPEG via `<picture>`, `srcset`/`sizes`, `width`/`height`, `loading="lazy"`, breakpoints 320–1920
 - **SEO**: title/description/canonical/robots, Open Graph, Twitter Card, JSON-LD (`WebSite`, `Organization`, `BreadcrumbList`, `FAQPage`, `VideoObject` — emitted only when fact-backed and eligible for the corresponding Google search feature)
 - **Accessibility**: WCAG 2.1 AA, contrast ≥ 4.5:1, keyboard navigation, `prefers-reduced-motion`
-- **Security**: `X-Content-Type-Options`, `X-Frame-Options`, `Permissions-Policy`, HTTPS, `rel="noopener noreferrer"`
+- **Security**: `X-Content-Type-Options`, `X-Frame-Options`, `Permissions-Policy`, `Referrer-Policy`, per-page CSP, staged HSTS, HTTPS enforcement, `rel="noopener noreferrer"`
 - **Fonts**: system fonts only — no external fonts, no Google Fonts
 - **JS budget ≤ 15 KB** for the whole page, one file with `defer`
 - **Forbidden**: external JS/CSS libraries, SVG images, synchronous scripts, iframes on first load
