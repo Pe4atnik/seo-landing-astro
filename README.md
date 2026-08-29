@@ -191,7 +191,7 @@ Once installed, the skill is picked up automatically by its description — just
 
 1. Give the agent a brief: domain, language, topic and keywords, business type, CTA and contacts.
 2. The skill creates a separate project folder (`<workspace>/<project-slug>/`) with `index.html`, `robots.txt`, `sitemap.xml`, and `SERVER-SETUP.md`.
-3. At the stop point, confirm the HTML version — the skill then runs validation (W3C, JSON-LD, Lighthouse) and produces a report: LCP, PageSpeed scores, and the schema.org types used.
+3. At the stop point, confirm the HTML version — the skill then runs validation (W3C, JSON-LD, Lighthouse as automated evidence, plus required manual accessibility checks) and produces a report: LCP, PageSpeed scores, and the schema.org types used.
 
 ## About the author
 

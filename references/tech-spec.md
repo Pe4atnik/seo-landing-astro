@@ -129,6 +129,7 @@ Create a static HTML site focused on maximum performance and SEO.
 - Non-text contrast at least 3:1 against adjacent colors (WCAG SC 1.4.11) for control boundaries, state indicators, focus indicators, and meaningful graphics needed to identify components or states. Validate the default, hover, `:focus-visible`, selected/expanded, error, and disabled states as applicable; record an exception only where the WCAG criterion itself excludes the component or state.
 - `prefers-reduced-motion` support covers every permitted animation: gate nonessential CSS/JS animation behind `@media (prefers-reduced-motion: no-preference)` or provide a `reduce` branch that disables/replaces it. In reduced mode render final counter values without animated counting, avoid smooth/programmatic scrolling, and keep functional state cues that do not rely on motion. Test the reduced preference across every optional animation and interactive state.
 - All interactive elements keyboard accessible
+- Manual accessibility verification is required before claiming WCAG 2.1 AA — no automated tool alone determines conformance (W3C). Required manual checks: keyboard navigation, focus order and visibility, dialog/modal focus flow, zoom/reflow, reduced motion, semantic name-role-value, alternative-text quality, and all interactive visual states. Lighthouse accessibility output is automated audit evidence, not certification. Record pass/fail evidence per applicable WCAG 2.1 AA criterion and report unresolved items rather than silently certifying them.
 
 ## 9. EMBEDDED VIDEO (facade pattern only)
 - Forbidden to load a YouTube iframe on page load — only on user click.
@@ -199,7 +200,7 @@ Generate the complete HTML code complying with ALL points above.
 One canonical sequence, shared with SKILL.md and README — do not reorder:
 1. Generate the draft, then self-check it against every requirement in this spec; fix violations before showing the draft.
 2. STOP POINT — show the draft to the user and ask explicitly whether the HTML version is OK. Do not run validation and do not report any metrics before the user approves.
-3. After approval: serve the page, then run validation — W3C HTML validity, JSON-LD schema validator, Lighthouse (performance, SEO, accessibility, best practices).
+3. After approval: serve the page, then run validation — W3C HTML validity, JSON-LD schema validator, Lighthouse (performance, SEO, accessibility, best practices — automated evidence only), and the manual accessibility checks in §8.
 4. Fix any failures found. If fixes change the approved HTML, obtain renewed approval before reporting.
 5. Final report — measured evidence only: LCP parameters, PageSpeed scores, schema.org types used.
 

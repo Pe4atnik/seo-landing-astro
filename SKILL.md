@@ -61,7 +61,8 @@ Show the generated page to the user and ask explicitly whether the HTML version 
 ### 5. Validate
 - W3C HTML validity.
 - JSON-LD via a schema.org validator.
-- Lighthouse / PageSpeed: performance, SEO, accessibility, best-practices.
+- Lighthouse / PageSpeed: performance, SEO, accessibility, best-practices — automated audit evidence, never WCAG certification.
+- Manual accessibility checks (tech-spec §8) — no automated tool alone determines WCAG conformance: keyboard navigation, focus order/visibility, dialog focus flow, zoom/reflow, reduced motion, semantic name-role-value, alternative-text quality, and all interactive visual states. Record pass/fail evidence per applicable WCAG 2.1 AA criterion; report unresolved items instead of silently certifying them.
 - Crawlability contract: parse `sitemap.xml`, compare every `<loc>` with the HTML canonical, check the `Sitemap:` URL in `robots.txt`, and request both deployed files successfully (HTTP 200).
 
 Fix any violations found before reporting. Do not mention the verification process in the final answer.
