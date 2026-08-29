@@ -56,6 +56,7 @@ Create a static HTML site focused on maximum performance and SEO.
 ## 2. HTML STRUCTURE
 - Document encoding: `<meta charset="utf-8">` as the very first element inside `<head>`, entirely within the first 1024 bytes of the document. All files are saved as UTF-8 without BOM.
 - Clean semantic HTML5: `<header>`, `<nav>`, `<main>`, `<article>`, `<section>`, `<footer>`
+- Bypass mechanism (WCAG SC 2.4.1): when the output is part of a multi-page site sharing repeated header/navigation, emit a first-focusable "Skip to main content" link targeting a stable `<main>` ID; make it visible on focus and verify activation moves focus and scroll to the main content. A genuinely standalone one-page landing without repeated blocks does not need this conditional mechanism.
 - One responsive HTML, no duplicate content (mobile/desktop)
 - Heading hierarchy: one H1, then H2–H6 by logic
 - Language tag matching the content: `<html lang="en-US">` or equivalent
