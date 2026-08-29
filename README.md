@@ -208,4 +208,4 @@ Made for the [t.me/sdelay_tam](https://t.me/sdelay_tam) channel — a cozy SEO c
 
 ## License
 [MIT](./LICENSE) — free to use, modify, and distribute, including commercially. Just keep the copyright notice.
-Specification: version 1.4, 2026-08-28.
+Specification: version 1.4, 2026-08-29.

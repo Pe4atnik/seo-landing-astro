@@ -1,6 +1,13 @@
 # Technical Specification — Fast SEO-Friendly Landing Pages
 
-Version 1.3 (27.08.2026)
+Version 1.4 (29.08.2026)
+
+The README footer must declare the same specification version and date —
+verify with `scripts/check-spec-version.sh` (fails when they diverge).
+
+## Change record
+- **1.4 (29.08.2026)** — canonical workflow order with stop point before validation (#24); mandatory `<meta charset="utf-8">` and UTF-8 Content-Type (#30); CSP/no-JS-safe deferred CSS (#31); `Vary: Accept-Encoding` for compressed responses (#28).
+- **1.3 (27.08.2026)** — initial published revision.
 
 ## Contents
 - 1. Performance (100/100 PageSpeed)
