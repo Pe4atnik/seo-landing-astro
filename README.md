@@ -81,7 +81,7 @@ seo-landing/
 
 - **Performance**: LCP < 2.5s, INP < 100ms, CLS < 0.1; critical CSS inlined, the rest loaded async; `preload` + `fetchpriority="high"` for the LCP image
 - **Images**: AVIF → WebP → JPEG via `<picture>`, `srcset`/`sizes`, `width`/`height`, `loading="lazy"`, breakpoints 320–1920
-- **SEO**: title/description/canonical/robots, Open Graph, Twitter Card, JSON-LD (`WebSite`, `Organization`, `BreadcrumbList`, `FAQPage`, `VideoObject` where applicable)
+- **SEO**: title/description/canonical/robots, Open Graph, Twitter Card, JSON-LD (`WebSite`, `Organization`, `BreadcrumbList`, `FAQPage`, `VideoObject` — emitted only when fact-backed and eligible for the corresponding Google search feature)
 - **Accessibility**: WCAG 2.1 AA, contrast ≥ 4.5:1, keyboard navigation, `prefers-reduced-motion`
 - **Security**: `X-Content-Type-Options`, `X-Frame-Options`, `Permissions-Policy`, HTTPS, `rel="noopener noreferrer"`
 - **Fonts**: system fonts only — no external fonts, no Google Fonts
