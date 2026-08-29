@@ -70,6 +70,7 @@ Create a static HTML site focused on maximum performance and SEO.
 - Twitter card: twitter:card, twitter:title, twitter:description, twitter:image
 - JSON-LD structured data (at the end of body):
   - `@type: WebSite` + `Organization`/`LocalBusiness` (with GEO data: address, phone, coordinates)
+  - `LocalBusiness` only when the verified identity facts exist: public/legal business name, complete structured postal address (street, locality, region, postal code, country), phone. Never invent identity data — fall back to `Organization` markup or omit entity markup when required facts are unavailable. Validate required properties against the current Google LocalBusiness structured-data documentation, not only schema.org syntax.
   - `@type: BreadcrumbList`
   - If such content blocks exist, add `FAQPage` and review markup
   - All URLs absolute, `@id` specified
