@@ -72,7 +72,7 @@ Format — [Agent Skills](https://agentskills.io) (open standard originally deve
 seo-landing/
 ├── SKILL.md              # Main workflow: brief → generation → stop point → validation → report
 └── references/
-    ├── tech-spec.md      # Technical spec (12 requirement sections)
+    ├── tech-spec.md      # Technical spec (13 requirement sections)
     ├── server-config.md  # Server config: caching, Brotli/gzip, security headers (Nginx/Apache)
     └── video-facade.md   # Reference implementation of the "facade" pattern for YouTube
 ```

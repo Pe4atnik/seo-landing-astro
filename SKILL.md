@@ -46,7 +46,9 @@ Every project lives in its own folder inside the workspace — **never write to 
 ```
 
 ### 2. Generate the page
-Build `index.html` strictly following [references/tech-spec.md](./references/tech-spec.md) — 12 requirement sections (performance, HTML structure, SEO, security, CSS/fonts, forbidden list, testing, accessibility, embedded video, typical blocks, deferred widgets, content truthfulness & provenance).
+Build `index.html` strictly following [references/tech-spec.md](./references/tech-spec.md) — 13 requirement sections (performance, HTML structure, SEO, security, CSS/fonts, forbidden list, testing, accessibility, embedded video, typical blocks, deferred widgets, content truthfulness & provenance, input sanitization & output encoding).
+
+Treat every brief value as untrusted: encode it for its exact output context (HTML text, attribute, URL, JSON-LD), allow-list URL schemes (reject `javascript:`/unexpected `data:`), escape `<` in serialized JSON-LD, and validate structured IDs (e.g. YouTube `^[A-Za-z0-9_-]{11}$`) before they reach any URL (tech-spec §13).
 
 For embedded YouTube video use the facade pattern only: rules in tech-spec §9, reference implementation in [references/video-facade.md](./references/video-facade.md).
 
@@ -75,6 +77,7 @@ Briefly list:
 
 ## Main pitfalls
 - Never use external JS/CSS libraries, external fonts, or SVG images (tech-spec §6).
+- Never emit a raw brief value into markup: context-encode everything, reject `javascript:`/unexpected `data:` URLs, and self-test generation with hostile values (quotes, `</script>`, event-handler payloads) (tech-spec §13).
 - Never load YouTube iframes, maps, chats, subscription popups, or cookie banners on first load (tech-spec §9, §11).
 - All content must exist in raw HTML — nothing rendered only by JS.
 - Absolute URLs in JSON-LD, canonical, and OG tags.

@@ -44,8 +44,13 @@ document.addEventListener('click', function (e) {
   var btn = e.target.closest('.video-play');
   if (!btn) return;
   var box = btn.closest('.video-facade');
+  // Validate the ID before building the URL — never interpolate untrusted
+  // data into a DOM-created URL (tech-spec §13). A YouTube ID is exactly
+  // 11 chars of [A-Za-z0-9_-]; anything else is a generation error.
+  var id = box.dataset.videoId || '';
+  if (!/^[A-Za-z0-9_-]{11}$/.test(id)) return;
   var iframe = document.createElement('iframe');
-  iframe.src = 'https://www.youtube-nocookie.com/embed/' + box.dataset.videoId + '?autoplay=1';
+  iframe.src = 'https://www.youtube-nocookie.com/embed/' + id + '?autoplay=1';
   iframe.title = btn.getAttribute('aria-label').replace('Watch video: ', '');
   iframe.loading = 'lazy';
   iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
@@ -72,3 +77,4 @@ document.querySelectorAll('.video-facade').forEach(function (box) {
 - One delegated handler covers any number of videos.
 - Before the click: zero requests to YouTube (~0.5–1 MB of JS and dozens of connections avoided).
 - CLS = 0: fixed `aspect-ratio: 16/9` and numeric `width/height`.
+- The video ID is untrusted input: it is validated against `^[A-Za-z0-9_-]{11}$` at generation time (tech-spec §13) and again before the iframe URL is built — a malformed ID must fail generation, not reach the DOM.

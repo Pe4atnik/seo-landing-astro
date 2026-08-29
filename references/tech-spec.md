@@ -26,6 +26,7 @@ repeating the version number — a number that exists in one place cannot diverg
 - 10. Typical blocks without speed loss
 - 11. Deferred widgets
 - 12. Content truthfulness & provenance
+- 13. Input sanitization & output encoding
 - Output requirements
 
 Create a static HTML site focused on maximum performance and SEO.
@@ -199,6 +200,15 @@ document.addEventListener('DOMContentLoaded', function () {
 - Health, financial, legal and other sensitive claims additionally require an identified subject-matter or legal reviewer appropriate to the target jurisdiction before publication.
 - When evidence is missing, report a blocker instead of publishing unsupported claims.
 - Image rights and provenance: for every asset used on the page (photos, logos, video covers, and all generated derivatives such as AVIF/WebP conversions) record in an `ASSETS.md` manifest: creator/rightsholder, source, license or permission, allowed reproduction/adaptation, attribution, territory, and expiry where applicable. Public availability of an image is not permission to copy or transform it — exclude or replace assets whose clearance is unavailable. Every generated derivative must link back to its provenance record. The manifest records supplied rights assertions and does not replace jurisdiction-specific legal advice.
+
+## 13. INPUT SANITIZATION & OUTPUT ENCODING
+Every value collected in the brief (domain, keywords, business name, address, contacts, media IDs, any free-text field) is UNTRUSTED input by default. Encode it for its exact output context — never copy a raw value into markup (OWASP XSS prevention):
+- HTML element content: escape `& < > " '` as HTML entities.
+- Attribute values: always quoted, attribute-escaped; never place untrusted data in event-handler attributes (`onclick` etc.) at all.
+- URL contexts (`href`, `src`, canonical, OG/JSON-LD URLs): validate the scheme against an allow-list of `https` (and `http` only where the brief requires it); REJECT `javascript:` and unexpected `data:` URLs outright — do not attempt to "clean" them.
+- JSON-LD: serialize with a JSON encoder, then additionally escape `<` (e.g. as `\u003c`) so embedded data can never terminate the `<script>` element — JSON escaping alone does not protect the HTML script context.
+- Structured identifiers are validated against their exact format before use in any URL built at runtime: a YouTube video ID must match `^[A-Za-z0-9_-]{11}$`; a malformed ID is a generation error, not a value to embed (see references/video-facade.md).
+- Generation self-test: run the generator with hostile brief values — quotes, angle brackets, a literal `</script>`, an `onerror=`/`onload=` payload, and `javascript:`/`data:` URLs. The output must remain valid HTML and execute none of them; a value that cannot be encoded safely for its context is rejected or omitted, never emitted raw.
 
 ## OUTPUT — canonical workflow order
 Generate the complete HTML code complying with ALL points above.
