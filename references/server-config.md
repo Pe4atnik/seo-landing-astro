@@ -61,7 +61,41 @@ AddDefaultCharset utf-8
 
 ## Nginx
 
+### Brotli prerequisite — the module must exist before these directives
+`brotli`/`brotli_types` are NOT part of stock Nginx. On a build without the
+module, `nginx -t` fails with `unknown directive "brotli"` and Nginx will not
+start. Before including the Brotli lines, confirm the module is present
+(https://github.com/google/ngx_brotli):
+
+```bash
+# Does this build know the brotli directives? (fails on stock builds)
+nginx -t 2>&1 | grep -i 'unknown directive' ; echo "exit: $?"
+# Which modules were compiled in / available?
+nginx -V 2>&1 | tr ' ' '\n' | grep -i brotli
+```
+
+Install paths (pick one, matching the host):
+- Distribution package that ships the module (e.g. Debian/Ubuntu
+  `libnginx-mod-brotli` where available) — enable it and keep the package
+  name/version in `SERVER-SETUP.md`.
+- Dynamic build: compile with `--add-dynamic-module=.../ngx_brotli`, then load
+  it in the MAIN context of `nginx.conf`, before any `http` block:
+  ```nginx
+  load_module modules/ngx_http_brotli_filter_module.so;
+  load_module modules/ngx_http_brotli_static_module.so;
+  ```
+- Static build: compile Nginx with `--add-module=.../ngx_brotli` (directives
+  then need no `load_module`).
+
+If the module cannot be installed on the target host: REMOVE the `brotli`
+lines entirely, ship gzip-only, and record that in the checklist — never leave
+directives that fail `nginx -t`, and never claim Brotli when only gzip is
+served. Apache behaves differently: the `<IfModule mod_brotli.c>` block is
+silently skipped when the module is absent, so the checklist must likewise be
+marked gzip-only (mod_brotli requires Apache ≥ 2.4.26).
+
 ```nginx
+# Only when the ngx_brotli module is installed and loaded (see above):
 brotli on;
 brotli_types text/html text/css application/javascript application/json image/svg+xml;
 gzip on;
@@ -110,12 +144,13 @@ include conf.d/security-headers.conf;
 ```
 
 ## Checklist
-- [ ] Brotli enabled (verify `Content-Encoding: br`), gzip as fallback
+- [ ] Config syntax check passes BEFORE reload: `nginx -t` (Nginx) or `apachectl configtest` (Apache)
+- [ ] Compression state recorded honestly: Brotli module installed and loaded (Nginx: package name / `load_module` lines documented; Apache: `mod_brotli` present). If not installed — the Brotli lines are removed and this is marked gzip-only, never silently skipped
+- [ ] Brotli verified with `curl -I -H 'Accept-Encoding: br' <url>` → `Content-Encoding: br`; gzip fallback with `curl -I -H 'Accept-Encoding: gzip' <url>` → `Content-Encoding: gzip`. In gzip-only mode verify the gzip request only
 - [ ] Compressed responses carry `Vary: Accept-Encoding`; identity, gzip and Brotli requests each get the right `Content-Encoding` (verify at origin and through any CDN)
 - [ ] Only fingerprinted asset URLs (content-hash in the filename) carry `immutable` with max-age 1 year; stable URLs carry a revalidation policy
 - [ ] Two-version deploy check: publish asset version A, deploy version B (new hash + updated HTML references), reload from a warm cache — version B loads immediately, no stale styles/scripts/images
 - [ ] HTML revalidated on every request
-- [ ] Config syntax check passes before reload: `nginx -t` (Nginx) or `apachectl configtest` (Apache)
 - [ ] All four security headers present on every response class — verify with `curl -I` against `/`, a `.css` file, a `.js` file, and a nonexistent URL (404); each response carries exactly one copy of all four headers (no duplicates, none missing on error responses or Nginx asset locations)
 - [ ] HTTPS enforced (redirect HTTP → HTTPS)
 - [ ] HTML responses carry `Content-Type: text/html; charset=utf-8` (verify with `curl -I`); `<meta charset="utf-8">` present within the first 1024 bytes; representative non-ASCII text, metadata and JSON-LD render correctly
