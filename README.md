@@ -1,6 +1,68 @@
 # SEO Landing
 
+## Give your AI coding agent the capabilities of a senior Technical SEO engineer.
+
+An agent skill for building high-performance, technically optimized SEO landing pages.
+Turn an AI coding agent into a technical SEO specialist.
+
+Build and improve landing pages with:
+	•	🚀 100/100 Google PageSpeed target
+	•	⚡ Core Web Vitals optimization
+	•	🔍 Technical SEO
+	•	🧩 Full Schema.org structured data
+	•	🖼️ AVIF image optimization
+	•	🎨 Critical CSS
+	•	🧹 Zero third-party runtime dependencies
+	•	📱 Mobile-first performance
+	•	🤖 Semantic HTML
+    
+##Works with AI coding agents
+Designed for agentic coding workflows and compatible with Agent Skills–style environments.
+
+##What it does?
+The skill guides an AI coding agent through the complete landing-page workflow:
+	1.	Analyze the existing page
+	2.	Fix technical SEO issues
+	3.	Optimize HTML structure
+	4.	Improve Core Web Vitals
+	5.	Optimize images and fonts
+	6.	Add structured data
+	7.	Remove unnecessary dependencies
+	8.	Validate the final implementation
+    
+##Why?
+AI can generate a beautiful landing page in seconds.
+The problem is that generated pages often contain:
+	•	unnecessary JavaScript
+	•	oversized images
+	•	poor semantic structure
+	•	missing structured data
+	•	weak metadata
+	•	performance bottlenecks
+	•	technical SEO mistakes
+    
+SEO Landing Skill gives the agent a repeatable technical SEO workflow instead of relying on generic prompting.
+
 An agent skill that builds and updates landing pages to hit **100/100 PageSpeed**, pass **Google Core Web Vitals**, and get the technical SEO right. Static HTML, critical CSS, AVIF images, full schema.org markup, zero third-party dependencies.
+
+BEFORE
+Landing page
+↓
+LCP: 4.2s
+Performance: 61
+Missing schema
+Large PNG
+Render-blocking CSS
+        ↓ SEO LANDING SKILL ↓
+AFTER
+Landing page
+↓
+LCP: 1.1s
+Performance: 100
+Schema.org ✓
+AVIF ✓
+Critical CSS ✓
+Semantic HTML ✓
 
 Format — [Agent Skills](https://agentskills.io) (open standard originally developed by Anthropic): works in VS Code Copilot, Claude Code, OpenAI Codex, Google Antigravity, Cursor, Gemini CLI, OpenClaw, Hermes, and other compatible agents.
 
