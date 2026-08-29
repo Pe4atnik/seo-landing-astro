@@ -195,6 +195,67 @@ curl -I 'https://site.com/'
 # Expected: 200 over HTTPS with the security headers present
 ```
 
+## Content-Security-Policy (generated per page)
+
+CSP cannot be bolted on generically — the policy is GENERATED from the exact
+features the page uses (OWASP recommends CSP as defense-in-depth against
+XSS/data injection, delivered via response header). The generated page keeps
+CSP-compatible by design: no inline event handlers, no inline scripts (the
+single page script is an external file with `defer`), inline CSS only in
+`<style>` blocks, JSON-LD as non-executable `application/ld+json`.
+
+Build the policy from this restrictive base, adding destinations only for
+features that exist on the page:
+
+```
+default-src 'self';
+script-src 'self';
+style-src 'self' 'sha256-<hash>';
+img-src 'self' data:;
+font-src 'self';
+connect-src 'self';
+object-src 'none';
+base-uri 'self';
+form-action 'self';
+frame-ancestors 'none'
+```
+
+Feature-specific additions:
+- Inline `<style>` blocks (critical CSS): authorize each block with its
+  `sha256-` hash in `style-src` — compute the hash of the exact emitted CSS.
+  Never fall back to `style-src 'unsafe-inline'` as the default; and NEVER use
+  `unsafe-inline` or `unsafe-eval` for `script-src`.
+- YouTube facade block present: add `https://www.youtube-nocookie.com` to
+  `frame-src` (iframe inserted on click) and to `connect-src` (the hover
+  preconnect). Omit both when the page has no video.
+- Form submitting to an external endpoint from the brief: extend
+  `form-action` with that exact origin. Default is `'self'`.
+- `data:` in `img-src` covers base64 LQIP placeholders; drop it when unused.
+
+Rollout — report-only first, then enforce:
+1. Deploy `Content-Security-Policy-Report-Only` with the generated policy.
+2. Exercise every generated feature combination in a real browser (video
+   click-through, form, deferred CSS path) and fix every reported violation.
+3. Switch the same policy to the enforcing `Content-Security-Policy` header
+   and re-test. Keep report-only available for future feature changes.
+
+Apache (inside the existing `<IfModule mod_headers.c>`):
+
+```apache
+Header always set Content-Security-Policy-Report-Only "<generated policy>"
+# After a clean report-only rollout, replace with:
+# Header always set Content-Security-Policy "<generated policy>"
+```
+
+Nginx — add to `conf.d/security-headers.conf` so it follows the same
+inheritance rules as the other headers (§ above):
+
+```nginx
+add_header Content-Security-Policy-Report-Only "<generated policy>" always;
+# After a clean report-only rollout, replace with:
+# add_header Content-Security-Policy "<generated policy>" always;
+```
+
 ## Checklist
 - [ ] Config syntax check passes BEFORE reload: `nginx -t` (Nginx) or `apachectl configtest` (Apache)
 - [ ] Compression state recorded honestly: Brotli module installed and loaded (Nginx: package name / `load_module` lines documented; Apache: `mod_brotli` present). If not installed — the Brotli lines are removed and this is marked gzip-only, never silently skipped
@@ -204,5 +265,6 @@ curl -I 'https://site.com/'
 - [ ] Two-version deploy check: publish asset version A, deploy version B (new hash + updated HTML references), reload from a warm cache — version B loads immediately, no stale styles/scripts/images
 - [ ] HTML revalidated on every request
 - [ ] All four security headers present on every response class — verify with `curl -I` against `/`, a `.css` file, a `.js` file, and a nonexistent URL (404); each response carries exactly one copy of all four headers (no duplicates, none missing on error responses or Nginx asset locations)
+- [ ] CSP generated for this page's exact feature set; deployed report-only first, browser-tested across every feature combination with zero unexpected violations, then enforced; no `unsafe-inline`/`unsafe-eval` in `script-src`; `youtube-nocookie.com` present in `frame-src`/`connect-src` only when the video block exists
 - [ ] HTTPS enforced: TLS certificate installed, HTTPS endpoint serves the site, and a port-80 vhost/server block issues exactly one 301/308 preserving host/path/query to the canonical host. Verify deployed: `curl -I 'http://<host>/path?q=1'` returns the single redirect to the expected HTTPS URL, and the HTTPS request succeeds
 - [ ] HTML responses carry `Content-Type: text/html; charset=utf-8` (verify with `curl -I`); `<meta charset="utf-8">` present within the first 1024 bytes; representative non-ASCII text, metadata and JSON-LD render correctly
