@@ -73,7 +73,7 @@ Create a static HTML site focused on maximum performance and SEO.
   - `Organization`/`LocalBusiness` (with GEO data: address, phone, coordinates)
   - `LocalBusiness` only when the verified identity facts exist: public/legal business name, complete structured postal address (street, locality, region, postal code, country), phone. Never invent identity data — fall back to `Organization` markup or omit entity markup when required facts are unavailable. Validate required properties against the current Google LocalBusiness structured-data documentation, not only schema.org syntax.
   - Emit the most specific truthful `LocalBusiness` subtype based on the actual business (e.g. `Restaurant`, `Dentist`), not target keywords; use an `@type` array only when multiple genuine types apply. Omit `LocalBusiness` markup entirely when no physical location exists. Validate the chosen type/property combination with Rich Results Test and Schema Markup Validator.
-  - `@type: BreadcrumbList`
+  - `@type: BreadcrumbList` only when a real site hierarchy exists: collect the visible breadcrumb trail and canonical parent URLs, require at least two truthful ordered `ListItem` entries, and keep the JSON-LD consistent with user-visible navigation. Omit `BreadcrumbList` for a standalone landing without a real hierarchy rather than inventing parent pages.
   - If such content blocks exist, add `FAQPage` and review markup
   - All URLs absolute, `@id` specified
 
