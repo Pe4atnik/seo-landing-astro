@@ -373,6 +373,53 @@ Record the actual server software and version in `SERVER-SETUP.md`, and verify
 behavior with the checklist — file presence or platform defaults are not proof
 that any of this is active.
 
+## Apache .htaccess activation — AllowOverride
+
+Apache IGNORES `.htaccess` completely unless the containing directory permits
+overrides (httpd howto/htaccess) — installing the file is not proof it is
+active. Every directive class used by this skill's `.htaccess` needs the
+`FileInfo` override class:
+
+| Directive | Module | Override class |
+|---|---|---|
+| `AddOutputFilterByType` | mod_deflate / mod_brotli | FileInfo |
+| `Header` (Cache-Control, Vary, security headers, CSP, HSTS) | mod_headers | FileInfo |
+| `AddType`, `AddCharset` | mod_mime | FileInfo |
+| `AddDefaultCharset` | core | FileInfo |
+
+So the directory must allow at least:
+
+```apache
+# In the server/virtual-host config (NOT in .htaccess itself)
+<Directory /var/www/site>
+  AllowOverride FileInfo
+</Directory>
+# or, where the host uses fine-grained lists:
+# AllowOverrideList FileInfo
+# or simply: AllowOverride All
+```
+
+If the host disables overrides entirely, move the same directives into the
+virtual-host/`<Directory>` config instead — the behavioral requirements below
+do not change.
+
+Module inventory — record it in `SERVER-SETUP.md`:
+- Required: `mod_headers`, `mod_mime`, `mod_deflate` (gzip).
+- Optional: `mod_brotli` (needs Apache ≥ 2.4.26; its `<IfModule>` block is
+  silently skipped when absent), `mod_rewrite` (only for the RewriteRule
+  redirect variant).
+- Every skipped `<IfModule>` block must be reflected as MISSING in the
+  checklist — never checked off as if active.
+
+Verification:
+1. `apachectl configtest` passes.
+2. Identify the effective `<Directory>` block (`apachectl -S` for vhosts, then
+   inspect its `AllowOverride`/`AllowOverrideList`).
+3. Behavioral proof only: deployed `curl -I` requests for the HTML page, a
+   static asset, and a 404 must show the expected caching, compression, and
+   security behavior. Missing behavior FAILS deployment verification — file
+   presence never substitutes for it.
+
 ## Checklist
 - [ ] Config syntax check passes BEFORE reload: `nginx -t` (Nginx) or `apachectl configtest` (Apache)
 - [ ] Compression state recorded honestly: Brotli module installed and loaded (Nginx: package name / `load_module` lines documented; Apache: `mod_brotli` present). If not installed — the Brotli lines are removed and this is marked gzip-only, never silently skipped
@@ -387,3 +434,4 @@ that any of this is active.
 - [ ] HSTS deployed in stages: short `max-age` first, long lifetime only after clean rollout; header present exactly once on HTTPS responses and absent on the HTTP redirect (verify with `curl -I`); `includeSubDomains` only when every subdomain is HTTPS-capable; `preload` only with the user's explicit recorded consent. HSTS supplements, never replaces, the HTTP→HTTPS redirect
 - [ ] HTML responses carry `Content-Type: text/html; charset=utf-8` (verify with `curl -I`); `<meta charset="utf-8">` present within the first 1024 bytes; representative non-ASCII text, metadata and JSON-LD render correctly
 - [ ] MIME types verified with deployed `curl -I` for every generated resource class (CSS, JS, each image format used, robots.txt, sitemap.xml) against the expected-type table; Nginx `mime.types` included (avif/webp mapped) or Apache `AddType` fallbacks in place — an absent or wrong `Content-Type` fails verification
+- [ ] Apache only: `.htaccess` activation verified — the effective `<Directory>` allows `AllowOverride FileInfo` (or `All`/`AllowOverrideList`), or the directives were moved into the vhost config; module inventory recorded (required: mod_headers, mod_mime, mod_deflate; optional: mod_brotli, mod_rewrite) and every skipped `<IfModule>` block marked missing, not checked off. `apachectl configtest` passes and deployed requests for HTML, an asset, and a 404 show the expected behavior — file presence is never treated as proof
