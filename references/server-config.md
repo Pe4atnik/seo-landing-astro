@@ -112,7 +112,9 @@ gzip_types text/html text/css application/javascript application/json image/svg+
 # that carries its own add_header. Nginx inherits parent add_header values
 # only when the child level defines NONE of its own — a location with a
 # Cache-Control add_header would otherwise silently lose all security headers.
-# Create conf.d/security-headers.conf containing exactly:
+# Create conf.d/security-headers.conf containing exactly (a relative include
+# path resolves against the nginx prefix — /etc/nginx on packaged installs;
+# use an absolute path in every include below if your layout differs):
 #   add_header X-Content-Type-Options "nosniff" always;
 #   add_header X-Frame-Options "DENY" always;
 #   add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
@@ -124,12 +126,15 @@ gzip_types text/html text/css application/javascript application/json image/svg+
 # a stable (unhashed) URL `immutable`: after the file is overwritten a
 # compliant cache may keep serving the old bytes for the entire max-age
 # (RFC 9111). Stable URLs get a revalidation policy instead.
-location ~* \.(avif|webp|jpg|jpeg|png|css|js)$ {
-  add_header Cache-Control "no-cache" always;
-  include conf.d/security-headers.conf;
-}
+# ORDER MATTERS: Nginx serves the FIRST matching regex location, so the
+# fingerprinted rule must come before the generic asset rule — otherwise
+# every fingerprinted file matches the generic rule and never gets immutable.
 location ~* \.[0-9a-f]{8,}\.(avif|webp|jpg|jpeg|png|css|js)$ {
   add_header Cache-Control "public, max-age=31536000, immutable" always;
+  include conf.d/security-headers.conf;
+}
+location ~* \.(avif|webp|jpg|jpeg|png|css|js)$ {
+  add_header Cache-Control "no-cache" always;
   include conf.d/security-headers.conf;
 }
 location ~* \.html$ {
@@ -342,6 +347,31 @@ Verification — deployed `curl -I` for every generated resource class (HTML,
 one `.css`, one `.js`, each image format actually used, `robots.txt`,
 `sitemap.xml`); a missing or incorrect `Content-Type` fails deployment
 verification.
+
+## Other servers — portability of these requirements
+
+Apache (.htaccess) and Nginx cover most self-managed hosting, and LiteSpeed
+Enterprise on shared hosting usually reads the same `.htaccess`. The
+REQUIREMENTS themselves are server-agnostic — whatever serves the site, the
+deployed result must satisfy the checklist below. On other stacks, translate
+the same mechanisms:
+
+- **Caddy**: `header` directives for the security headers, automatic HTTPS
+  plus `redir` for the redirect, matchers for per-path Cache-Control.
+- **IIS / Windows**: `web.config` — `<customHeaders>` under `<httpProtocol>`
+  plus URL Rewrite rules for the redirect.
+- **OpenLiteSpeed**: response-header and rewrite rules in the admin console —
+  port the same directives (`.htaccess` support is partial).
+- **Managed/static platforms** (Netlify, Vercel, Cloudflare Pages, GitHub
+  Pages): there is no `.htaccess`/`nginx.conf` at all. Security headers and
+  redirects go in platform config (`netlify.toml` or `_headers`/`_redirects`,
+  `vercel.json` headers/rewrites, Cloudflare Pages `_headers`/`_redirects`);
+  compression and MIME types are platform-managed. Run the same `curl -I`
+  checklist against the deployed URLs instead.
+
+Record the actual server software and version in `SERVER-SETUP.md`, and verify
+behavior with the checklist — file presence or platform defaults are not proof
+that any of this is active.
 
 ## Checklist
 - [ ] Config syntax check passes BEFORE reload: `nginx -t` (Nginx) or `apachectl configtest` (Apache)
