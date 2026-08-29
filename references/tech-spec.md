@@ -106,6 +106,7 @@ Create a static HTML site focused on maximum performance and SEO.
   - Never use block-name/number wording as alt text. Include manual screen-reader and accessible-name checks in validation.
 - External links open in the current browsing context by default. Use `target="_blank"` only for an explicit UX/task reason (e.g. a form submission must not be abandoned, a reference must stay open), keep `rel="noopener noreferrer"` when used, and warn users in advance both visibly and programmatically — e.g. `External site <span class="visually-hidden">(opens in a new tab)</span>` or equivalent link text. Test keyboard and screen-reader behavior so the link purpose and the new-tab context change are announced.
 - All file links and external links must use HTTPS
+- HTTPS enforcement is part of the deployment contract, not an assumption: the generated `SERVER-SETUP.md` must include a tested port-80 virtual host/server block that issues a single permanent 301/308 redirect preserving host, path, and query string to the canonical HTTPS host, plus the TLS certificate prerequisite and reverse-proxy/CDN caveats (see references/server-config.md).
 
 ## 5. CSS / FONTS
 - ONLY system fonts: `font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Helvetica Neue", Arial, sans-serif;`

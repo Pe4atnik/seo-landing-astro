@@ -143,6 +143,58 @@ charset_types text/html text/css application/javascript application/json;
 include conf.d/security-headers.conf;
 ```
 
+## HTTPS enforcement (HTTP → HTTPS redirect)
+
+Prerequisites: a valid TLS certificate for the canonical host must already be
+installed and the HTTPS endpoint must serve the site successfully before the
+redirect is enabled. Behind a reverse proxy/CDN (Cloudflare, ALB, etc.) the
+redirect may be terminated at the edge — apply the same rule there and make
+sure the edge forwards the original scheme/host (e.g. `X-Forwarded-Proto`) if
+the origin decides on the redirect.
+
+The redirect must be a permanent `301` (or `308`, which additionally preserves
+the request method), must preserve host, path, and query string, and must point
+at the canonical host chosen for the project (e.g. always `https://site.com/…`
+or always `https://www.site.com/…` — one canonical host, matching the HTML
+canonical URL).
+
+### Apache — port-80 virtual host
+
+```apache
+<VirtualHost *:80>
+  ServerName site.com
+  ServerAlias www.site.com
+  # Preserve host, path and query; normalize to the canonical host
+  Redirect permanent / https://site.com/
+</VirtualHost>
+```
+
+`Redirect permanent` issues a 301 and appends the request path and query
+automatically. If the canonical host equals the requested host and only the
+scheme must change, `RewriteEngine On` +
+`RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]` is the
+equivalent (requires `mod_rewrite`).
+
+### Nginx — port-80 server block
+
+```nginx
+server {
+  listen 80;
+  listen [::]:80;
+  server_name site.com www.site.com;
+  # 301 to the canonical host, preserving path and query string
+  return 301 https://site.com$request_uri;
+}
+```
+
+### Verification
+```bash
+curl -I 'http://site.com/path?q=1'
+# Expected: one 301/308 with Location: https://site.com/path?q=1
+curl -I 'https://site.com/'
+# Expected: 200 over HTTPS with the security headers present
+```
+
 ## Checklist
 - [ ] Config syntax check passes BEFORE reload: `nginx -t` (Nginx) or `apachectl configtest` (Apache)
 - [ ] Compression state recorded honestly: Brotli module installed and loaded (Nginx: package name / `load_module` lines documented; Apache: `mod_brotli` present). If not installed — the Brotli lines are removed and this is marked gzip-only, never silently skipped
@@ -152,5 +204,5 @@ include conf.d/security-headers.conf;
 - [ ] Two-version deploy check: publish asset version A, deploy version B (new hash + updated HTML references), reload from a warm cache — version B loads immediately, no stale styles/scripts/images
 - [ ] HTML revalidated on every request
 - [ ] All four security headers present on every response class — verify with `curl -I` against `/`, a `.css` file, a `.js` file, and a nonexistent URL (404); each response carries exactly one copy of all four headers (no duplicates, none missing on error responses or Nginx asset locations)
-- [ ] HTTPS enforced (redirect HTTP → HTTPS)
+- [ ] HTTPS enforced: TLS certificate installed, HTTPS endpoint serves the site, and a port-80 vhost/server block issues exactly one 301/308 preserving host/path/query to the canonical host. Verify deployed: `curl -I 'http://<host>/path?q=1'` returns the single redirect to the expected HTTPS URL, and the HTTPS request succeeds
 - [ ] HTML responses carry `Content-Type: text/html; charset=utf-8` (verify with `curl -I`); `<meta charset="utf-8">` present within the first 1024 bytes; representative non-ASCII text, metadata and JSON-LD render correctly
