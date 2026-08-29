@@ -1,11 +1,12 @@
 # Technical Specification — Fast SEO-Friendly Landing Pages
 
-Version 1.5 (29.08.2026)
+Version 1.6 (30.08.2026)
 
 The README footer must declare the same specification version and date —
 verify with `scripts/check-spec-version.sh` (fails when they diverge).
 
 ## Change record
+- **1.6 (30.08.2026)** — accessibility contract: native-HTML-first ARIA rule (#45); no forced new tabs for external links (#46); accessible carousel contract (#47); complete modal `<dialog>` workflow (#48); form labels and input-purpose metadata (#49); reduced-motion gate over every permitted animation (#50); non-text contrast 3:1 (#33); conditional bypass/skip-link mechanism (#34); purpose-based image alternatives (#13); required manual accessibility checks before claiming WCAG AA (#14).
 - **1.5 (29.08.2026)** — truthfulness and provenance: verified LocalBusiness identity and most-specific subtype (#15, #44); WebSite only on the domain/subdomain home page (#35); BreadcrumbList only with a real hierarchy (#22); FAQPage eligibility limits (#23); Review/AggregateRating gated to eligible source-backed cases (#16); Speakable restricted to its beta news eligibility (#21); VideoObject only from collected media facts (#36); crawlable favicon in the output contract (#38); truthful sitemap/robots discovery contract (#37); source-backed marketing claims (#42); asset rights and provenance manifest (#43).
 - **1.4 (29.08.2026)** — canonical workflow order with stop point before validation (#24); mandatory `<meta charset="utf-8">` and UTF-8 Content-Type (#30); CSP/no-JS-safe deferred CSS (#31); `Vary: Accept-Encoding` for compressed responses (#28).
 - **1.3 (27.08.2026)** — initial published revision.
