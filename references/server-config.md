@@ -39,6 +39,15 @@ Include these instructions in the project's `SERVER-SETUP.md`.
   <FilesMatch "\.html$">
     Header set Cache-Control "max-age=0, must-revalidate"
   </FilesMatch>
+  # robots.txt and sitemap.xml: exact files, never immutable (see the
+  # "robots.txt & sitemap.xml caching" section below). These match by exact
+  # filename, so they are not caught by the extension rules above.
+  <Files "robots.txt">
+    Header set Cache-Control "no-cache"
+  </Files>
+  <Files "sitemap.xml">
+    Header set Cache-Control "no-cache"
+  </Files>
 </IfModule>
 
 # Serve HTML as UTF-8
@@ -139,6 +148,18 @@ location ~* \.(avif|webp|jpg|jpeg|png|css|js)$ {
 }
 location ~* \.html$ {
   add_header Cache-Control "max-age=0, must-revalidate" always;
+  include conf.d/security-headers.conf;
+}
+# robots.txt and sitemap.xml: EXACT-path locations, never immutable (see the
+# "robots.txt & sitemap.xml caching" section below). Exact `location =` blocks
+# win over the regex asset rules above, so these files can never inherit an
+# immutable policy.
+location = /robots.txt {
+  add_header Cache-Control "no-cache" always;
+  include conf.d/security-headers.conf;
+}
+location = /sitemap.xml {
+  add_header Cache-Control "no-cache" always;
   include conf.d/security-headers.conf;
 }
 
@@ -348,6 +369,35 @@ one `.css`, one `.js`, each image format actually used, `robots.txt`,
 `sitemap.xml`); a missing or incorrect `Content-Type` fails deployment
 verification.
 
+## robots.txt & sitemap.xml caching
+
+These two files are CRAWLER-FACING contracts: a stale copy means crawlers keep
+following disallowed or removed URLs, or miss new pages. They must NEVER be
+`immutable` and never get a long `max-age` — Google itself documents that
+robots.txt responses are cached for up to 24 hours regardless of headers, so
+any TTL you choose adds to that propagation delay.
+
+Policy (already encoded in the Apache/Nginx blocks above):
+- Exact-path rules only (`<Files "robots.txt">` / `location = /robots.txt`,
+  same for `sitemap.xml`) — never an extension or prefix rule that could also
+  catch other files, and never inside a rule that can mark them `immutable`.
+- Default: `no-cache` (may be stored, must revalidate every reuse). If a CDN
+  or host requires a positive TTL, use a short one (e.g. `max-age=3600`) and
+  record it in `SERVER-SETUP.md` together with the resulting worst-case
+  propagation delay (TTL + any CDN edge TTL + Google's own ~24h robots cache).
+- Keep conditional-request support intact: ETag/Last-Modified must survive so
+  unchanged files answer `304 Not Modified` — do not strip validators or
+  disable them for these paths.
+
+Verification (at the origin AND behind any CDN):
+1. `curl -I https://site/robots.txt` and `.../sitemap.xml` show the expected
+   `Cache-Control` and no `immutable`.
+2. Unchanged file: a second request with `If-None-Match`/`If-Modified-Since`
+   returns `304`.
+3. Changed file: after redeploying a modified robots.txt/sitemap.xml, the next
+   request returns `200` with the NEW bytes — at origin and at the CDN edge
+   (purge if the CDN caches; record the purge step in `SERVER-SETUP.md`).
+
 ## Other servers — portability of these requirements
 
 Apache (.htaccess) and Nginx cover most self-managed hosting, and LiteSpeed
@@ -435,3 +485,4 @@ Verification:
 - [ ] HTML responses carry `Content-Type: text/html; charset=utf-8` (verify with `curl -I`); `<meta charset="utf-8">` present within the first 1024 bytes; representative non-ASCII text, metadata and JSON-LD render correctly
 - [ ] MIME types verified with deployed `curl -I` for every generated resource class (CSS, JS, each image format used, robots.txt, sitemap.xml) against the expected-type table; Nginx `mime.types` included (avif/webp mapped) or Apache `AddType` fallbacks in place — an absent or wrong `Content-Type` fails verification
 - [ ] Apache only: `.htaccess` activation verified — the effective `<Directory>` allows `AllowOverride FileInfo` (or `All`/`AllowOverrideList`), or the directives were moved into the vhost config; module inventory recorded (required: mod_headers, mod_mime, mod_deflate; optional: mod_brotli, mod_rewrite) and every skipped `<IfModule>` block marked missing, not checked off. `apachectl configtest` passes and deployed requests for HTML, an asset, and a 404 show the expected behavior — file presence is never treated as proof
+- [ ] robots.txt & sitemap.xml: exact-path cache rules active (never `immutable`, default `no-cache` or a documented short TTL with its worst-case propagation delay recorded); ETag/Last-Modified preserved — unchanged file answers `304`, changed file answers `200` with new bytes, verified at origin AND behind the CDN (with purge step recorded if the CDN caches)
