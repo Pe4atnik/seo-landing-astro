@@ -21,7 +21,7 @@ Required before generating anything:
 - Domain / final URL — for canonical, og:url, absolute paths, JSON-LD `@id`.
 - Page language and locale — for `lang` and `og:locale`.
 - Topic + 1–3 target keywords — for H1, title, description.
-- Business type: Organization or LocalBusiness. For LocalBusiness collect the verified public/legal business name and the complete structured postal address (street, locality, region, postal code, country), plus phone and geo coordinates. Never invent missing identity facts: fall back to `Organization` markup or omit entity markup until the facts are provided.
+- Business type: Organization or LocalBusiness. For LocalBusiness collect the verified public/legal business name and the complete structured postal address (street, locality, region, postal code, country), plus phone and geo coordinates. Also collect the verified schema.org subtype(s) based on the actual business (e.g. `Restaurant`, `Dentist`, `HardwareStore`) — never chosen from target keywords. Never invent missing identity facts: fall back to `Organization` markup or omit entity markup until the facts are provided.
 - CTA and contacts (phone, form, messengers).
 - Whether images are provided; whether FAQ / reviews / video blocks are needed.
 
