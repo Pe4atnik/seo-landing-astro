@@ -120,7 +120,7 @@ Create a static HTML site focused on maximum performance and SEO.
 ## 8. ACCESSIBILITY AND INCLUSIVITY
 - WCAG 2.1 Level AA compliance
 - Text contrast ratio at least 4.5:1
-- `prefers-reduced-motion` support
+- `prefers-reduced-motion` support covers every permitted animation: gate nonessential CSS/JS animation behind `@media (prefers-reduced-motion: no-preference)` or provide a `reduce` branch that disables/replaces it. In reduced mode render final counter values without animated counting, avoid smooth/programmatic scrolling, and keep functional state cues that do not rely on motion. Test the reduced preference across every optional animation and interactive state.
 - All interactive elements keyboard accessible
 
 ## 9. EMBEDDED VIDEO (facade pattern only)
@@ -153,7 +153,7 @@ Create a static HTML site focused on maximum performance and SEO.
 - Map: facade like video (§9) — map screenshot, iframe on click.
 - Reviews: static HTML, no widgets. `Review`/`AggregateRating` JSON-LD only under the §3 gates: never self-serving for the represented business, only source-backed facts, visible-page parity.
 - Form: native validation (`required`, `type="email"`), honeypot field against spam, no external form builders. Every user-facing control gets a visible label programmatically associated via `<label for>` (not placeholder-only), plus any required format/instruction text. Personal-data fields carry the correct standardized `autocomplete` token where the WCAG 2.1 input-purpose taxonomy applies (e.g. `name`, `email`, `tel`, `street-address`). The honeypot stays out of the accessibility tree and tab order (`tabindex="-1"`, `aria-hidden="true"`, visually hidden) and is never given an `autocomplete` value that browsers could autofill. Validate autocomplete values and test browser autofill plus assistive-technology exposure.
-- Scroll counters and animations: one `IntersectionObserver` in the common script; animations only via `transform`/`opacity`.
+- Scroll counters and animations: one `IntersectionObserver` in the common script; animations only via `transform`/`opacity` and always inside the §8 reduced-motion gate — counters render their final value instantly and scrolling is never smoothed when the user prefers reduced motion.
 - Sticky header: `position: sticky` — pure CSS, no JS listeners.
 - Back-to-top button: anchor link or 5 lines of JS.
 - General rules:
