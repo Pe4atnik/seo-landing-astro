@@ -157,15 +157,16 @@ document.addEventListener('DOMContentLoaded', function () {
 - All deferred widgets: keyboard accessible, closable with Esc, have aria attributes and visible `:focus-visible`.
 - Popups must not cover first-screen content and must not shift the layout.
 
-## OUTPUT
+## OUTPUT — canonical workflow order
 Generate the complete HTML code complying with ALL points above.
 
-BEFORE OUTPUTTING THE CODE:
-- Check compliance with every checklist item
-- If a violation is found — fix it
-- Do not mention the verification process in the final answer
+One canonical sequence, shared with SKILL.md and README — do not reorder:
+1. Generate the draft, then self-check it against every requirement in this spec; fix violations before showing the draft.
+2. STOP POINT — show the draft to the user and ask explicitly whether the HTML version is OK. Do not run validation and do not report any metrics before the user approves.
+3. After approval: serve the page, then run validation — W3C HTML validity, JSON-LD schema validator, Lighthouse (performance, SEO, accessibility, best practices).
+4. Fix any failures found. If fixes change the approved HTML, obtain renewed approval before reporting.
+5. Final report — measured evidence only: LCP parameters, PageSpeed scores, schema.org types used.
 
-AFTER OUTPUTTING THE HTML CODE, briefly list:
-- LCP parameters
-- PageSpeed score
-- schema.org types used in the code
+Rules:
+- Never claim LCP/PageSpeed numbers before the corresponding check has actually run on the served page.
+- Do not mention the verification process in the final answer.
