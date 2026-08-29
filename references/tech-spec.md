@@ -42,7 +42,7 @@ Create a static HTML site focused on maximum performance and SEO.
 - Responsive breakpoints: 320, 640, 768, 1024, 1280, 1920
 - Blur placeholder or LQIP (Low Quality Image Placeholder)
 - `aspect-ratio` in CSS to prevent layout shift
-- `speakable` markup for voice search (optional — only for news/recipe-type pages)
+- `speakable` markup — BETA, do not use by default. Eligible only for topical news content from English-language publishers targeting Google Home users in the United States; recipes and ordinary landing pages are not eligible. When eligibility is established, collect the CSS selector or XPath targets, keep the selected text concise, visible and suitable for audio, and label the feature as beta. Omit it when eligibility cannot be confirmed.
 - Static assets: `Cache-Control: public, max-age=31536000, immutable`
 - HTML: `max-age=0, must-revalidate`
 - Server instructions must specify Brotli (br) preferred, gzip fallback
