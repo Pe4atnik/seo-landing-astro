@@ -48,7 +48,7 @@ Create a static HTML site focused on maximum performance and SEO.
 - Blur placeholder or LQIP (Low Quality Image Placeholder)
 - `aspect-ratio` in CSS to prevent layout shift
 - `speakable` markup — BETA, do not use by default. Eligible only for topical news content from English-language publishers targeting Google Home users in the United States; recipes and ordinary landing pages are not eligible. When eligibility is established, collect the CSS selector or XPath targets, keep the selected text concise, visible and suitable for audio, and label the feature as beta. Omit it when eligibility cannot be confirmed.
-- Static assets: `Cache-Control: public, max-age=31536000, immutable`
+- Static assets are emitted with fingerprinted filenames — a content-hash fragment in the name (e.g. `styles.a1b2c3d4.css`, `hero.9f31c2ab.webp`). Only fingerprinted URLs may receive `Cache-Control: public, max-age=31536000, immutable`; every asset change must regenerate the hash and update all HTML references (including `srcset`) in the same commit. A stable (unhashed) URL must never be marked `immutable` — a compliant cache may serve the old bytes for the entire max-age after the file is overwritten (RFC 9111); stable URLs get a revalidation policy (`no-cache`) instead.
 - HTML: `max-age=0, must-revalidate`
 - Server instructions must specify Brotli (br) preferred, gzip fallback
 - Preload the LCP image: `<link rel="preload" as="image" href="hero.webp" fetchpriority="high">`

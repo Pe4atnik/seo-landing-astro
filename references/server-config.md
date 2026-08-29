@@ -20,19 +20,27 @@ Include these instructions in the project's `SERVER-SETUP.md`.
   </FilesMatch>
 </IfModule>
 
-# Caching
-<IfModule mod_expires.c>
-  ExpiresActive On
-  # Static assets: 1 year, immutable
-  ExpiresByType image/avif "access plus 1 year"
-  ExpiresByType image/webp "access plus 1 year"
-  ExpiresByType image/jpeg "access plus 1 year"
-  ExpiresByType image/png "access plus 1 year"
-  ExpiresByType text/css "access plus 1 year"
-  ExpiresByType application/javascript "access plus 1 year"
+# Caching — Cache-Control (mod_headers) is authoritative; no Expires headers.
+# `immutable` is allowed ONLY for fingerprinted assets: the generator renames
+# each static asset with a content-hash fragment (styles.a1b2c3d4.css) and
+# updates every HTML reference on change. A stable (unhashed) URL must never
+# be `immutable`: after the file is overwritten, a compliant cache may keep
+# serving the old bytes for the entire max-age (RFC 9111).
+<IfModule mod_headers.c>
+  # Stable (unhashed) asset URLs: may be stored but must revalidate on reuse
+  <FilesMatch "\.(avif|webp|jpg|jpeg|png|css|js)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
+  # Fingerprinted URLs (>=8 hex chars before the extension): 1 year, immutable
+  <FilesMatch "\.[0-9a-f]{8,}\.(avif|webp|jpg|jpeg|png|css|js)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
   # HTML: revalidate every time
-  ExpiresByType text/html "access plus 0 seconds"
+  <FilesMatch "\.html$">
+    Header set Cache-Control "max-age=0, must-revalidate"
+  </FilesMatch>
 </IfModule>
+
 # Serve HTML as UTF-8
 AddDefaultCharset utf-8
 <IfModule mod_mime.c>
@@ -40,12 +48,6 @@ AddDefaultCharset utf-8
 </IfModule>
 
 <IfModule mod_headers.c>
-  <FilesMatch "\.(avif|webp|jpg|jpeg|png|css|js)$">
-    Header set Cache-Control "public, max-age=31536000, immutable"
-  </FilesMatch>
-  <FilesMatch "\.html$">
-    Header set Cache-Control "max-age=0, must-revalidate"
-  </FilesMatch>
 
   # Security headers
   Header set X-Content-Type-Options "nosniff"
@@ -67,11 +69,20 @@ gzip_types text/html text/css application/javascript application/json image/svg+
 # carry exactly one Vary: Accept-Encoding (e.g. via a map on $http_accept_encoding
 # or CDN rules) without duplicating the value gzip_vary already adds.
 
+# Cache-Control: `immutable` is allowed ONLY for fingerprinted assets — the
+# generator renames each static asset with a content-hash fragment
+# (styles.a1b2c3d4.css) and updates every HTML reference on change. Never mark
+# a stable (unhashed) URL `immutable`: after the file is overwritten a
+# compliant cache may keep serving the old bytes for the entire max-age
+# (RFC 9111). Stable URLs get a revalidation policy instead.
 location ~* \.(avif|webp|jpg|jpeg|png|css|js)$ {
-  add_header Cache-Control "public, max-age=31536000, immutable";
+  add_header Cache-Control "no-cache" always;
+}
+location ~* \.[0-9a-f]{8,}\.(avif|webp|jpg|jpeg|png|css|js)$ {
+  add_header Cache-Control "public, max-age=31536000, immutable" always;
 }
 location ~* \.html$ {
-  add_header Cache-Control "max-age=0, must-revalidate";
+  add_header Cache-Control "max-age=0, must-revalidate" always;
 }
 
 # Serve HTML/CSS/JS as UTF-8
@@ -87,7 +98,8 @@ add_header Referrer-Policy "strict-origin-when-cross-origin" always;
 ## Checklist
 - [ ] Brotli enabled (verify `Content-Encoding: br`), gzip as fallback
 - [ ] Compressed responses carry `Vary: Accept-Encoding`; identity, gzip and Brotli requests each get the right `Content-Encoding` (verify at origin and through any CDN)
-- [ ] Static assets cached 1 year with `immutable`
+- [ ] Only fingerprinted asset URLs (content-hash in the filename) carry `immutable` with max-age 1 year; stable URLs carry a revalidation policy
+- [ ] Two-version deploy check: publish asset version A, deploy version B (new hash + updated HTML references), reload from a warm cache — version B loads immediately, no stale styles/scripts/images
 - [ ] HTML revalidated on every request
 - [ ] All four security headers present
 - [ ] HTTPS enforced (redirect HTTP → HTTPS)
