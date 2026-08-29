@@ -25,6 +25,7 @@ Required before generating anything:
 - Topic + 1–3 target keywords — for H1, title, description.
 - Business type: Organization or LocalBusiness. For LocalBusiness collect the verified public/legal business name and the complete structured postal address (street, locality, region, postal code, country), plus phone and geo coordinates. Also collect the verified schema.org subtype(s) based on the actual business (e.g. `Restaurant`, `Dentist`, `HardwareStore`) — never chosen from target keywords. Never invent missing identity facts: fall back to `Organization` markup or omit entity markup until the facts are provided.
 - CTA and contacts (phone, form, messengers).
+- A brand-approved favicon or explicit permission to create one — never invent a brand mark silently.
 - Whether images are provided; whether FAQ / reviews / video blocks are needed. For a video block collect source-backed facts: video URL/ID, title, description, accurate first-publication date/time with timezone, and a unique crawlable thumbnail (plus `contentUrl` when applicable). Never invent missing media facts.
 
 If domain or keywords are missing — ask first, do not invent them.
@@ -36,6 +37,7 @@ Every project lives in its own folder inside the workspace — **never write to 
 <workspace>/<project-slug>/
   index.html        # the generated landing page
   images/           # local assets (AVIF/WebP/JPEG)
+  favicon.png       # stable square brand icon, ≥48×48
   robots.txt
   sitemap.xml
   SERVER-SETUP.md   # hosting instructions

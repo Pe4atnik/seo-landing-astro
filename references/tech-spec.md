@@ -68,6 +68,7 @@ Create a static HTML site focused on maximum performance and SEO.
   - `<link rel="canonical" href="https://site.com/">`
 - Open Graph: og:title, og:description, og:image, og:type, og:url, og:locale (plus og:image:width, og:image:height, og:image:alt)
 - Twitter card: twitter:card, twitter:title, twitter:description, twitter:image
+- Favicon: a stable local square PNG/ICO of at least 48×48 (dimensions a multiple of 48px) plus `<link rel="icon" href="https://site.com/favicon.png">` on the home page. The asset must be brand-approved (or created with explicit permission), included in the project manifest, and verified to return 200 and remain crawlable. Meeting these rules makes the icon eligible for Google Search results — it does not guarantee display.
 - JSON-LD structured data (at the end of body):
   - `@type: WebSite` (with `name` and the canonical root `url`) only on the domain or subdomain home page, consistent with visible branding; omit it for subdirectory landings when the root home page is outside this project's scope. Never invent a site identity or use a subdirectory URL as the WebSite root.
   - `Organization`/`LocalBusiness` (with GEO data: address, phone, coordinates)
