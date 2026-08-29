@@ -55,6 +55,7 @@ document.addEventListener('click', function (e) {
   iframe.loading = 'lazy';
   iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
   iframe.allowFullscreen = true;
+  iframe.referrerPolicy = 'no-referrer'; // never leak the landing URL to YouTube
   box.innerHTML = '';
   box.appendChild(iframe);
   iframe.focus();
@@ -78,3 +79,4 @@ document.querySelectorAll('.video-facade').forEach(function (box) {
 - Before the click: zero requests to YouTube (~0.5–1 MB of JS and dozens of connections avoided).
 - CLS = 0: fixed `aspect-ratio: 16/9` and numeric `width/height`.
 - The video ID is untrusted input: it is validated against `^[A-Za-z0-9_-]{11}$` at generation time (tech-spec §13) and again before the iframe URL is built — a malformed ID must fail generation, not reach the DOM.
+- Third-party governance (tech-spec §11): the YouTube embed is a documented dependency — record origin, activation moment (click only), CSP `frame-src`/`connect-src` destination, and subrequests in the per-page manifest. `referrerPolicy="no-referrer"` is set on the iframe so the landing URL is never sent to YouTube. `sandbox` is a documented incompatibility for this embed: YouTube playback requires `allow-scripts` + `allow-same-origin` together, which equals no sandbox — record that justification instead of adding a no-op sandbox. Verify after deployment: playback starts on click, and fullscreen works.
