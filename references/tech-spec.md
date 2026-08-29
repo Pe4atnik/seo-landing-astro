@@ -21,6 +21,7 @@ verify with `scripts/check-spec-version.sh` (fails when they diverge).
 - 9. Embedded video (facade pattern only)
 - 10. Typical blocks without speed loss
 - 11. Deferred widgets
+- 12. Content truthfulness & provenance
 - Output requirements
 
 Create a static HTML site focused on maximum performance and SEO.
@@ -176,6 +177,12 @@ document.addEventListener('DOMContentLoaded', function () {
 - Online chat and subscription popup: if it is a third-party service — load its script only per the rule above; the widget container must not reserve space before loading (no CLS).
 - All deferred widgets: keyboard accessible, closable with Esc, have aria attributes and visible `:focus-visible`.
 - Popups must not cover first-screen content and must not shift the layout.
+
+## 12. CONTENT TRUTHFULNESS & PROVENANCE
+- Never invent objective marketing facts: numerical results, prices, availability, credentials, certifications, comparisons, guarantees, customer logos/cases, or regulated claims.
+- Every objective claim in the generated copy must trace back to approved source material collected in the brief, with an identified claim owner. Self-check before the stop point: list each objective claim and its source; a claim without a source is requested from the user or omitted — never silently filled with generated copy.
+- Health, financial, legal and other sensitive claims additionally require an identified subject-matter or legal reviewer appropriate to the target jurisdiction before publication.
+- When evidence is missing, report a blocker instead of publishing unsupported claims.
 
 ## OUTPUT — canonical workflow order
 Generate the complete HTML code complying with ALL points above.

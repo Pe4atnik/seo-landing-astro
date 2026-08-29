@@ -26,6 +26,7 @@ Required before generating anything:
 - Business type: Organization or LocalBusiness. For LocalBusiness collect the verified public/legal business name and the complete structured postal address (street, locality, region, postal code, country), plus phone and geo coordinates. Also collect the verified schema.org subtype(s) based on the actual business (e.g. `Restaurant`, `Dentist`, `HardwareStore`) — never chosen from target keywords. Never invent missing identity facts: fall back to `Organization` markup or omit entity markup until the facts are provided.
 - CTA and contacts (phone, form, messengers).
 - A brand-approved favicon or explicit permission to create one — never invent a brand mark silently.
+- Approved source material and a claim owner for objective marketing facts (numbers, prices, qualifications, guarantees, comparisons, case studies) — without them such claims are omitted, never invented.
 - Whether images are provided; whether FAQ / reviews / video blocks are needed. For a video block collect source-backed facts: video URL/ID, title, description, accurate first-publication date/time with timezone, and a unique crawlable thumbnail (plus `contentUrl` when applicable). Never invent missing media facts.
 
 If domain or keywords are missing — ask first, do not invent them.
@@ -44,7 +45,7 @@ Every project lives in its own folder inside the workspace — **never write to 
 ```
 
 ### 2. Generate the page
-Build `index.html` strictly following [references/tech-spec.md](./references/tech-spec.md) — 11 requirement sections (performance, HTML structure, SEO, security, CSS/fonts, forbidden list, testing, accessibility, embedded video, typical blocks, deferred widgets).
+Build `index.html` strictly following [references/tech-spec.md](./references/tech-spec.md) — 12 requirement sections (performance, HTML structure, SEO, security, CSS/fonts, forbidden list, testing, accessibility, embedded video, typical blocks, deferred widgets, content truthfulness & provenance).
 
 For embedded YouTube video use the facade pattern only: rules in tech-spec §9, reference implementation in [references/video-facade.md](./references/video-facade.md).
 
