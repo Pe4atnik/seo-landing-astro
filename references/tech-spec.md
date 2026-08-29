@@ -1,12 +1,13 @@
 # Technical Specification — Fast SEO-Friendly Landing Pages
 
-Version 1.7 (30.08.2026)
+Version 1.8 (30.08.2026)
 
 This file is the single source of truth for the specification version and its
 change record. Other documents (README, SKILL) must point here instead of
 repeating the version number — a number that exists in one place cannot diverge.
 
 ## Change record
+- **1.8 (30.08.2026)** — server & security hardening batch: `immutable` caching restricted to fingerprinted asset URLs with verified Nginx location ordering (#9); security headers reach Nginx child locations and Apache error responses (#10); Brotli module prerequisite documented and validated, gzip-only fallback recorded honestly (#11); executable HTTP→HTTPS deployment contract (#12); context-aware output encoding and URL validation for untrusted brief input (#25); deployable per-page Content-Security-Policy with staged rollout (#26); HTTPS-only HSTS with safe staged rollout (#27); MIME mappings defined and verified per generated resource class (#29); Apache `.htaccess` activation (AllowOverride classes, module inventory) documented (#40); third-party code governance — dependency manifest, SRI, explicit referrer policy, minimum iframe sandbox (#51); exact-path never-immutable cache policies for robots.txt and sitemap.xml with 304/200 verification (#52). Server requirements declared server-agnostic with portability guidance for Caddy, IIS, OpenLiteSpeed, and managed platforms.
 - **1.7 (30.08.2026)** — single source of truth: the specification version and change record live only in this file; the README footer points here instead of duplicating the version, and the version-divergence check script is removed (#20 follow-up).
 - **1.6 (30.08.2026)** — accessibility contract: native-HTML-first ARIA rule (#45); no forced new tabs for external links (#46); accessible carousel contract (#47); complete modal `<dialog>` workflow (#48); form labels and input-purpose metadata (#49); reduced-motion gate over every permitted animation (#50); non-text contrast 3:1 (#33); conditional bypass/skip-link mechanism (#34); purpose-based image alternatives (#13); required manual accessibility checks before claiming WCAG AA (#14).
 - **1.5 (29.08.2026)** — truthfulness and provenance: verified LocalBusiness identity and most-specific subtype (#15, #44); WebSite only on the domain/subdomain home page (#35); BreadcrumbList only with a real hierarchy (#22); FAQPage eligibility limits (#23); Review/AggregateRating gated to eligible source-backed cases (#16); Speakable restricted to its beta news eligibility (#21); VideoObject only from collected media facts (#36); crawlable favicon in the output contract (#38); truthful sitemap/robots discovery contract (#37); source-backed marketing claims (#42); asset rights and provenance manifest (#43).
