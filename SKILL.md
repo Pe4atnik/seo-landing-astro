@@ -49,7 +49,8 @@ Build `index.html` strictly following [references/tech-spec.md](./references/tec
 For embedded YouTube video use the facade pattern only: rules in tech-spec §9, reference implementation in [references/video-facade.md](./references/video-facade.md).
 
 ### 3. Generate companion files
-- `robots.txt` and `sitemap.xml` (with `lastmod`).
+- `robots.txt` at the site root with a fully qualified `Sitemap:` line, never blocking the canonical page or required media.
+- `sitemap.xml` with XML-escaped absolute canonical `<loc>` URLs matching the HTML canonical; `lastmod` only from a verifiable significant-content-change timestamp (omit when unknown — never use generation time blindly).
 - Hosting instructions from [references/server-config.md](./references/server-config.md): caching, Brotli/gzip, security headers.
 
 ### 4. STOP POINT — user approval
@@ -59,6 +60,7 @@ Show the generated page to the user and ask explicitly whether the HTML version 
 - W3C HTML validity.
 - JSON-LD via a schema.org validator.
 - Lighthouse / PageSpeed: performance, SEO, accessibility, best-practices.
+- Crawlability contract: parse `sitemap.xml`, compare every `<loc>` with the HTML canonical, check the `Sitemap:` URL in `robots.txt`, and request both deployed files successfully (HTTP 200).
 
 Fix any violations found before reporting. Do not mention the verification process in the final answer.
 

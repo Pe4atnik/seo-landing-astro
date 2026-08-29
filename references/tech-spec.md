@@ -78,6 +78,10 @@ Create a static HTML site focused on maximum performance and SEO.
   - If a visible, complete FAQ content block exists, add `FAQPage` markup. Distinguish schema.org validity from Google rich-result eligibility: Google currently shows FAQ rich results regularly only for well-known authoritative government and health sites, and valid markup never guarantees display. Keep or omit the markup intentionally based on the user's goals, and never report it as an achieved rich-result benefit.
   - `Review`/`AggregateRating` markup is forbidden for the represented Organization/LocalBusiness itself (self-serving ratings are ineligible for LocalBusiness rich results). Emit review markup only for an eligible reviewed entity with collected facts: reviewed entity, author, date, source, rating scale and count — and only when every rating is visible on the page exactly as marked up. Omit rating markup when eligibility or source authenticity is not established.
   - All URLs absolute, `@id` specified
+- Crawlability contract (robots.txt + sitemap.xml):
+  - `sitemap.xml`: valid UTF-8 XML with XML-escaped, absolute canonical `<loc>` URLs; each `<loc>` must match the page's HTML canonical. Populate `lastmod` only from a verifiable significant-content-change timestamp — omit it when unknown rather than using generation time blindly.
+  - `robots.txt`: deployed at the site root with a fully qualified `Sitemap:` URL; must not block the canonical page or required media (images, video covers).
+  - Validation: parse the sitemap XML, compare every `<loc>` with the HTML canonical, check the `Sitemap:` URL in robots.txt, and request both deployed files successfully (HTTP 200).
 
 ## 4. SECURITY AND ACCESSIBILITY
 - `<meta name="referrer" content="strict-origin-when-cross-origin">`
