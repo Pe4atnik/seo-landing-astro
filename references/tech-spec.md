@@ -25,7 +25,10 @@ Create a static HTML site focused on maximum performance and SEO.
 - Inline ALL critical CSS in `<style>` inside `<head>` (only first-screen styles)
 - First screen = header + hero + CTA (up to 800px height on desktop, 70vh on smartphones)
 - Critical CSS must include ONLY the styles of these blocks
-- Load below-the-fold CSS asynchronously: `<link rel="stylesheet" href="styles.css" media="print" onload="this.media='all'">`
+- Below-the-fold CSS — two options, both must work with JavaScript disabled and under a strict CSP:
+  - Default: inline ALL CSS (critical + below-the-fold) in `<head>` — landing CSS is usually small enough that deferral is not justified by measurement.
+  - Only when measurement shows a real benefit: `<link rel="preload" href="styles.css" as="style">` plus `<link rel="stylesheet" href="styles.css" media="print">`, and switch `media` to `all` from the single deferred page script. Never use an inline `onload` handler on the link — it breaks under CSP and contradicts the script policy. Add a `<noscript><link rel="stylesheet" href="styles.css"></noscript>` fallback.
+- Verify full screen rendering with JavaScript disabled, under the enforced CSP, and after a stylesheet load failure
 - ALL images: AVIF with WebP/JPEG fallback via `<picture>`, lazy loading, `decoding="async"`, numeric width/height in pixels on every image
 - Use `srcset` and `sizes` on all `<img>`
 - Calculate `sizes` from the container max-width
