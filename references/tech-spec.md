@@ -93,7 +93,7 @@ Create a static HTML site focused on maximum performance and SEO.
   - `Permissions-Policy: camera=(), microphone=(), geolocation=()`
 - Accessibility: native HTML first (W3C's first rule of ARIA). Use semantic elements (`<button>`, `<a>`, `<details>`, `<dialog>`, native form controls) and add ARIA only for necessary semantics not already supplied by the element. Never duplicate or override native roles/states. For each custom component define its accessible name, role, state, keyboard behavior, and how state changes are announced; validate ARIA conformance and inspect the resulting accessibility tree.
 - Title and alt mandatory for all images, matching the block name and number within the block when there are several images
-- Wrap all external links: `<a href="https://example.com" target="_blank" rel="noopener noreferrer">External site</a>`
+- External links open in the current browsing context by default. Use `target="_blank"` only for an explicit UX/task reason (e.g. a form submission must not be abandoned, a reference must stay open), keep `rel="noopener noreferrer"` when used, and warn users in advance both visibly and programmatically — e.g. `External site <span class="visually-hidden">(opens in a new tab)</span>` or equivalent link text. Test keyboard and screen-reader behavior so the link purpose and the new-tab context change are announced.
 - All file links and external links must use HTTPS
 
 ## 5. CSS / FONTS
