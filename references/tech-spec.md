@@ -95,6 +95,8 @@ Create a static HTML site focused on maximum performance and SEO.
   - `X-Content-Type-Options: nosniff`
   - `X-Frame-Options: DENY`
   - `Permissions-Policy: camera=(), microphone=(), geolocation=()`
+  - `Referrer-Policy: strict-origin-when-cross-origin`
+  - They must reach every response class, not only successful HTML: configure inheritance so Nginx child locations and Apache locally generated responses (404/error pages, internal redirects) carry them too, and verify with `curl -I` on `/`, `.css`, `.js`, and a 404 (see references/server-config.md).
 - Accessibility: native HTML first (W3C's first rule of ARIA). Use semantic elements (`<button>`, `<a>`, `<details>`, `<dialog>`, native form controls) and add ARIA only for necessary semantics not already supplied by the element. Never duplicate or override native roles/states. For each custom component define its accessible name, role, state, keyboard behavior, and how state changes are announced; validate ARIA conformance and inspect the resulting accessibility tree.
 - Image alternatives are purpose-based (W3C images tutorial), not a blanket title/alt mandate:
   - Informative images: concise `alt` text conveying the image's purpose.
