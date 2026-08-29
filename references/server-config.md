@@ -26,6 +26,12 @@ Include these instructions in the project's `SERVER-SETUP.md`.
   # HTML: revalidate every time
   ExpiresByType text/html "access plus 0 seconds"
 </IfModule>
+# Serve HTML as UTF-8
+AddDefaultCharset utf-8
+<IfModule mod_mime.c>
+  AddCharset utf-8 .html .css .js .xml .json
+</IfModule>
+
 <IfModule mod_headers.c>
   <FilesMatch "\.(avif|webp|jpg|jpeg|png|css|js)$">
     Header set Cache-Control "public, max-age=31536000, immutable"
@@ -57,6 +63,10 @@ location ~* \.html$ {
   add_header Cache-Control "max-age=0, must-revalidate";
 }
 
+# Serve HTML/CSS/JS as UTF-8
+charset utf-8;
+charset_types text/html text/css application/javascript application/json;
+
 add_header X-Content-Type-Options "nosniff" always;
 add_header X-Frame-Options "DENY" always;
 add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
@@ -69,3 +79,4 @@ add_header Referrer-Policy "strict-origin-when-cross-origin" always;
 - [ ] HTML revalidated on every request
 - [ ] All four security headers present
 - [ ] HTTPS enforced (redirect HTTP → HTTPS)
+- [ ] HTML responses carry `Content-Type: text/html; charset=utf-8` (verify with `curl -I`); `<meta charset="utf-8">` present within the first 1024 bytes; representative non-ASCII text, metadata and JSON-LD render correctly

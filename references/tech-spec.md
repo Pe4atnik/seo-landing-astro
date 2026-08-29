@@ -42,6 +42,7 @@ Create a static HTML site focused on maximum performance and SEO.
 - Absolute paths for ALL resources: `src="https://site.com/images/photo.webp"`
 
 ## 2. HTML STRUCTURE
+- Document encoding: `<meta charset="utf-8">` as the very first element inside `<head>`, entirely within the first 1024 bytes of the document. All files are saved as UTF-8 without BOM.
 - Clean semantic HTML5: `<header>`, `<nav>`, `<main>`, `<article>`, `<section>`, `<footer>`
 - One responsive HTML, no duplicate content (mobile/desktop)
 - Heading hierarchy: one H1, then H2–H6 by logic
