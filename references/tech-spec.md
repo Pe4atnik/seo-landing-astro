@@ -91,7 +91,7 @@ Create a static HTML site focused on maximum performance and SEO.
   - `X-Content-Type-Options: nosniff`
   - `X-Frame-Options: DENY`
   - `Permissions-Policy: camera=(), microphone=(), geolocation=()`
-- Accessibility: aria attributes on interactive elements
+- Accessibility: native HTML first (W3C's first rule of ARIA). Use semantic elements (`<button>`, `<a>`, `<details>`, `<dialog>`, native form controls) and add ARIA only for necessary semantics not already supplied by the element. Never duplicate or override native roles/states. For each custom component define its accessible name, role, state, keyboard behavior, and how state changes are announced; validate ARIA conformance and inspect the resulting accessibility tree.
 - Title and alt mandatory for all images, matching the block name and number within the block when there are several images
 - Wrap all external links: `<a href="https://example.com" target="_blank" rel="noopener noreferrer">External site</a>`
 - All file links and external links must use HTTPS
@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded', function () {
 - Insert widget scripts dynamically (`createElement` + `appendChild`) with async/defer attributes, never as a static tag in `<head>`.
 - Cookie banner: own block (~20 lines of CSS + 5 lines of JS for localStorage), no third-party services; show only if consent has not been given yet.
 - Online chat and subscription popup: if it is a third-party service — load its script only per the rule above; the widget container must not reserve space before loading (no CLS).
-- All deferred widgets: keyboard accessible, closable with Esc, have aria attributes and visible `:focus-visible`.
+- All deferred widgets: keyboard accessible, closable with Esc, carry only the ARIA needed beyond native semantics (§4), and show visible `:focus-visible`.
 - Popups must not cover first-screen content and must not shift the layout.
 
 ## 12. CONTENT TRUTHFULNESS & PROVENANCE
