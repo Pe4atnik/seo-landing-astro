@@ -72,7 +72,7 @@ Format — [Agent Skills](https://agentskills.io) (open standard originally deve
 seo-landing/
 ├── SKILL.md              # Main workflow: brief → generation → stop point → validation → report
 └── references/
-    ├── tech-spec.md      # Technical spec v1.6 (12 requirement sections)
+    ├── tech-spec.md      # Technical spec (12 requirement sections)
     ├── server-config.md  # Server config: caching, Brotli/gzip, security headers (Nginx/Apache)
     └── video-facade.md   # Reference implementation of the "facade" pattern for YouTube
 ```
@@ -208,4 +208,4 @@ Made for the [t.me/sdelay_tam](https://t.me/sdelay_tam) channel — a cozy SEO c
 
 ## License
 [MIT](./LICENSE) — free to use, modify, and distribute, including commercially. Just keep the copyright notice.
-Specification: version 1.6, 2026-08-30.
+Specification: see [references/tech-spec.md](./references/tech-spec.md) — the current version and change record are declared there.

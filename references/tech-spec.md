@@ -1,11 +1,13 @@
 # Technical Specification — Fast SEO-Friendly Landing Pages
 
-Version 1.6 (30.08.2026)
+Version 1.7 (30.08.2026)
 
-The README footer must declare the same specification version and date —
-verify with `scripts/check-spec-version.sh` (fails when they diverge).
+This file is the single source of truth for the specification version and its
+change record. Other documents (README, SKILL) must point here instead of
+repeating the version number — a number that exists in one place cannot diverge.
 
 ## Change record
+- **1.7 (30.08.2026)** — single source of truth: the specification version and change record live only in this file; the README footer points here instead of duplicating the version, and the version-divergence check script is removed (#20 follow-up).
 - **1.6 (30.08.2026)** — accessibility contract: native-HTML-first ARIA rule (#45); no forced new tabs for external links (#46); accessible carousel contract (#47); complete modal `<dialog>` workflow (#48); form labels and input-purpose metadata (#49); reduced-motion gate over every permitted animation (#50); non-text contrast 3:1 (#33); conditional bypass/skip-link mechanism (#34); purpose-based image alternatives (#13); required manual accessibility checks before claiming WCAG AA (#14).
 - **1.5 (29.08.2026)** — truthfulness and provenance: verified LocalBusiness identity and most-specific subtype (#15, #44); WebSite only on the domain/subdomain home page (#35); BreadcrumbList only with a real hierarchy (#22); FAQPage eligibility limits (#23); Review/AggregateRating gated to eligible source-backed cases (#16); Speakable restricted to its beta news eligibility (#21); VideoObject only from collected media facts (#36); crawlable favicon in the output contract (#38); truthful sitemap/robots discovery contract (#37); source-backed marketing claims (#42); asset rights and provenance manifest (#43).
 - **1.4 (29.08.2026)** — canonical workflow order with stop point before validation (#24); mandatory `<meta charset="utf-8">` and UTF-8 Content-Type (#30); CSP/no-JS-safe deferred CSS (#31); `Vary: Accept-Encoding` for compressed responses (#28).
