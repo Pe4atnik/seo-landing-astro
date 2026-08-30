@@ -134,6 +134,8 @@ git clone https://github.com/aleksandr-alhoff/seo-landing.git
 
 Every recipe below is self-contained: it creates its destination directory first, then copies the skill into it. Each one must exit with status `0` and leave the layout `<skills-dir>/seo-landing/SKILL.md` in place.
 
+Note: `cp -R` from a git clone also copies the clone's `.git` directory into the installation — harmless, but unnecessary. To keep installations lean, replace `cp -R seo-landing <dir>/` with `rsync -a --exclude=.git seo-landing <dir>/seo-landing/` (the same sync used for updates below).
+
 ```bash
 # VS Code Copilot
 mkdir -p ~/.copilot/skills
@@ -207,6 +209,83 @@ cp -R seo-landing skills/
 mkdir -p .hermes/skills
 cp -R seo-landing .hermes/skills/
 ```
+
+## Updating, verifying, and uninstalling installed copies
+
+Two facts drive everything below:
+
+1. **`git pull` changes only the clone.** An installed copy made with `cp -R` is independent — pulling the source clone does NOT update any installation.
+2. **`cp -R` copies, it does not synchronize.** GNU `cp` has no destination-sync/removal behavior: a file deleted upstream stays in the installed copy forever, producing a mixed release of old and new instructions.
+
+So an update is an explicit, bounded, idempotent sync into the resolved skill destination — never a blind re-copy.
+
+### Destinations (one per client and scope)
+
+| Client / scope | Installed skill destination (`$DEST`) |
+|---|---|
+| VS Code Copilot — global | `~/.copilot/skills/seo-landing` |
+| Claude Code — global | `~/.claude/skills/seo-landing` |
+| OpenAI Codex CLI / ChatGPT desktop — global | `~/.agents/skills/seo-landing` |
+| Cursor — global | `~/.cursor/skills/seo-landing` |
+| Gemini CLI — global | `~/.gemini/skills/seo-landing` |
+| Google Antigravity — global | `~/.gemini/config/skills/seo-landing` |
+| OpenCode — global | `~/.config/opencode/skills/seo-landing` |
+| OpenClaw — global | `~/.openclaw/skills/seo-landing` |
+| Hermes — global | `~/.hermes/skills/seo-landing` |
+| Shared per-project (Copilot, Codex, Cursor, Antigravity, Gemini CLI, OpenCode, OpenClaw, Hermes) | `.agents/skills/seo-landing` |
+| Claude Code — per project | `.claude/skills/seo-landing` |
+| VS Code Copilot — per project (GitHub-style) | `.github/skills/seo-landing` |
+| OpenClaw — workspace (highest precedence) | `skills/seo-landing` |
+| Hermes — per project | `.hermes/skills/seo-landing` |
+
+### Update (idempotent sync, removes upstream-deleted files)
+
+Run from the directory that contains the updated `seo-landing/` clone, with `$DEST` set to the destination from the table above:
+
+```bash
+DEST=~/.copilot/skills/seo-landing   # ← substitute the right destination
+
+# 1. Recovery first: back up the current installation (the sync is destructive).
+cp -R "$DEST" "$DEST.backup-$(date +%Y%m%d)"
+
+# 2. Bounded idempotent sync: copy new/changed files AND delete files inside
+#    $DEST that no longer exist upstream. --delete only ever touches $DEST.
+rsync -a --delete --exclude=.git seo-landing/ "$DEST/"
+
+# 3. Verify: zero differences (exit status 0) and the installed SKILL.md
+#    matches the source revision byte-for-byte.
+diff -qr -x .git seo-landing "$DEST" && cmp "$DEST/SKILL.md" seo-landing/SKILL.md
+```
+
+Notes:
+- `rsync -a --delete` is available out of the box on macOS (openrsync) and on typical Linux systems; `--exclude=.git` keeps the clone's history out of the installation.
+- The backup in step 1 is the recovery path: if the new version misbehaves, restore it with `rm -rf "$DEST" && cp -R "$DEST.backup-<date>" "$DEST"`. (macOS openrsync does not support `--backup`, so the explicit copy is the verified mechanism.)
+- The sync is safe to re-run at any time — running it twice in a row changes nothing the second time.
+- Tested upgrade path: an installation containing a file that the new revision removed loses that file after the sync, and the installed `SKILL.md` becomes byte-identical to the source revision.
+
+### Verify an existing installation at any time
+
+```bash
+diff -qr -x .git seo-landing "$DEST"
+```
+
+Exit status `0` (no output) means the installation matches the clone exactly. Any printed difference is a stale, modified, or extra file — re-run the update sync to resolve it. To check which specification version is installed, read the `Version` line at the top of `$DEST/references/tech-spec.md` (the single source of truth for versions).
+
+### Reload / restart after an update
+
+Agents read skills when a session starts. After updating, **start a new chat session** (or restart the agent CLI) before relying on the new version. Clients that gate skills behind trust/approval (e.g. Hermes: `hermes skills trust`) may require re-trusting the updated copy.
+
+### Uninstall
+
+```bash
+rm -rf "$DEST"   # the destination from the table above
+```
+
+If the copy was installed through a client CLI (`openclaw skills install`, `gemini skills install`), prefer that client's own uninstall command when it provides one; otherwise removing the destination directory is sufficient. Also remove any backups (`$DEST.backup-*`) you no longer need.
+
+### Symlinked installations — optional/experimental
+
+Symlinking the clone into a skills directory (so `git pull` updates it in place) is possible in principle, but official symlink support, trust handling, and reload behavior differ per client and are NOT verified here — treat this as experimental. The rsync sync above is the supported, client-independent update path.
 
 Once installed, the skill is picked up automatically by its description — just ask your agent to "build a landing page from a brief with focus on SEO and PageSpeed".
 
