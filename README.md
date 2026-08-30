@@ -84,7 +84,8 @@ seo-landing/
 └── references/
     ├── tech-spec.md      # Technical spec (13 requirement sections)
     ├── server-config.md  # Server config: caching, Brotli/gzip, security headers (Nginx/Apache)
-    └── video-facade.md   # Reference implementation of the "facade" pattern for YouTube
+    ├── video-facade.md   # Reference implementation of the "facade" pattern for YouTube
+    └── map-facade.md     # Reference implementation of the "facade" pattern for map embeds
 ```
 
 ## Key requirements enforced by the skill
