@@ -211,19 +211,30 @@ Create a static HTML site focused on maximum performance and SEO.
 
 ## 11. DEFERRED WIDGETS (online chats, subscription popups, cookie banners)
 - Forbidden to load their scripts/styles on first load — async only.
-- Initialization strictly 1 second after the DOMContentLoaded event:
+- Consent gate (default-off): nonessential third-party widgets never load on a timer alone.
+  - Consent states: `none` (fresh visitor, no choice made), `accepted`, `rejected`; revoking returns the state to `none`. Persist the state in first-party `localStorage` under a documented key with a timestamp.
+  - The consent UI (cookie banner) is first-party only: own block (~20 lines of CSS + 5 lines of JS for localStorage), no third-party services, zero third-party requests from the banner itself; show only if consent has not been given yet.
+  - A nonessential external widget script loads only after one of: (a) the visitor makes the affirmative applicable consent choice (`accepted`), or (b) the visitor explicitly activates that feature (e.g. clicks the chat launcher — explicit activation is an affirmative choice for that widget).
+  - Rejection keeps the widget unloaded; revocation removes the inserted widget (remove its script/iframe/container where feasible) and clears the stored choice.
+  - The deferred timer may prepare first-party UI only — it must never create a third-party `<script>` on its own:
 
 ```javascript
 document.addEventListener('DOMContentLoaded', function () {
-  setTimeout(function () { /* dynamically create <script> or insert the widget */ }, 1000);
+  setTimeout(function () {
+    // First-party only: show the consent banner when no choice exists yet.
+    // Third-party widget scripts are inserted only after consent or
+    // explicit feature activation — never by this timer.
+    if (localStorage.getItem('consent') === null) showConsentBanner();
+  }, 1000);
 });
 ```
 
 - Insert widget scripts dynamically (`createElement` + `appendChild`) with async/defer attributes, never as a static tag in `<head>`.
-- Cookie banner: own block (~20 lines of CSS + 5 lines of JS for localStorage), no third-party services; show only if consent has not been given yet.
-- Online chat and subscription popup: if it is a third-party service — load its script only per the rule above; the widget container must not reserve space before loading (no CLS).
+- Online chat and subscription popup: if it is a third-party service — load its script only per the consent gate above; the widget container must not reserve space before loading (no CLS).
 - All deferred widgets: keyboard accessible, closable with Esc, carry only the ARIA needed beyond native semantics (§4), and show visible `:focus-visible`.
 - Popups must not cover first-screen content and must not shift the layout.
+- Budget honesty: the 15 KB JS budget (§10) and the "zero third-party dependencies" claim describe the FIRST LOAD of the generated page. Deferred third-party widget scripts are not counted against the 15 KB budget — but they ARE third-party dependencies, and any page shipping them must say so: they are documented in the dependency manifest (§11 governance), loaded only under the consent gate, and the page must never be marketed as having "zero third-party dependencies" unqualified. Qualify the claim as "zero third-party requests on first load" whenever deferred widgets exist.
+- Network tests (browser, per state, before reporting): with DevTools filtered to third-party domains — (a) fresh visitor: no widget requests before any choice; (b) rejected: none at all; (c) accepted: widget requests appear only after the choice; (d) revoked: widget removed and no further requests. The consent banner itself must produce zero third-party requests in every state.
 - Third-party code governance — every external script or iframe gets a per-page dependency manifest entry (in the project's `SERVER-SETUP.md` or a dedicated `DEPENDENCIES.md`): origin, exact path and version, purpose, owner/approver, activation moment (first load vs deferred), its CSP destination (`script-src`/`frame-src`/`connect-src` hash or host entry), and known subrequests it triggers. No undocumented third-party dependency may ship.
 - Subresource integrity: third-party scripts loaded from a stable, versioned URL must carry `integrity` (sha384/sha512) plus `crossorigin="anonymous"`. A documented exception is allowed only when the vendor URL is mutable (no stable hash possible) — record the reason in the manifest and prefer self-hosting a pinned copy.
 - Referrer: every third-party request gets an explicit referrer policy — `referrerpolicy="no-referrer"` (or `strict-origin-when-cross-origin` where the vendor requires the origin), set per element; never rely on the page default leaking full URLs to vendors.

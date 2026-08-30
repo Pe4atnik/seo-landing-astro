@@ -13,7 +13,7 @@ Build and improve landing pages with:
 - 🧩 Full Schema.org structured data
 - 🖼️ AVIF image optimization
 - 🎨 Critical CSS
-- 🧹 Zero third-party runtime dependencies
+- 🧹 Zero third-party requests on first load
 - 📱 Mobile-first performance
 - 🤖 Semantic HTML
 
@@ -49,7 +49,7 @@ The problem is that generated pages often contain:
 
 SEO Landing Skill gives the agent a repeatable technical SEO workflow instead of relying on generic prompting.
 
-An agent skill that builds and updates landing pages to hit **100/100 PageSpeed**, pass **Google Core Web Vitals**, and get the technical SEO right. Static HTML, critical CSS, AVIF images, full schema.org markup, zero third-party dependencies.
+An agent skill that builds and updates landing pages to hit **100/100 PageSpeed**, pass **Google Core Web Vitals**, and get the technical SEO right. Static HTML, critical CSS, AVIF images, full schema.org markup, zero third-party requests on first load (deferred widgets, when used, are consent-gated and documented in the dependency manifest).
 
 ```text
 BEFORE
@@ -96,7 +96,7 @@ seo-landing/
 - **Accessibility**: WCAG 2.1 AA, contrast ≥ 4.5:1, keyboard navigation, `prefers-reduced-motion`
 - **Security**: `X-Content-Type-Options`, `X-Frame-Options`, `Permissions-Policy`, `Referrer-Policy`, per-page CSP, staged HSTS, HTTPS enforcement, `rel="noopener noreferrer"`
 - **Fonts**: system fonts only — no external fonts, no Google Fonts
-- **JS budget ≤ 15 KB** for the whole page, one file with `defer`
+- **JS budget ≤ 15 KB** for the first load, one file with `defer`; deferred third-party widgets (when used) are consent-gated, excluded from the budget, and disclosed in the dependency manifest
 - **Forbidden**: external JS/CSS libraries, SVG images, synchronous scripts, iframes on first load
 - **Video & maps**: "facade" pattern only — the cover is a local responsive image (eager when it is the LCP/above the fold, lazy below the fold), the iframe loads only on click
 - **Common blocks without JS**: FAQ via `<details>`, slider via `scroll-snap`, modal via `<dialog>`
