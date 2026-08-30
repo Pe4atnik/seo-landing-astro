@@ -49,7 +49,7 @@ The problem is that generated pages often contain:
 
 SEO Landing Skill gives the agent a repeatable technical SEO workflow instead of relying on generic prompting.
 
-An agent skill that builds and updates landing pages to hit **100/100 PageSpeed**, pass **Google Core Web Vitals**, and get the technical SEO right. Static HTML, critical CSS, AVIF images, full schema.org markup, zero third-party requests on first load (deferred widgets, when used, are consent-gated and documented in the dependency manifest).
+An agent skill that builds and updates landing pages toward **100/100 lab PageSpeed** and Core Web Vitals-friendly performance, and gets the technical SEO right. Static HTML, critical CSS, AVIF images, full schema.org markup, zero third-party requests on first load (deferred widgets, when used, are consent-gated and documented in the dependency manifest). These are optimization targets, not guaranteed outcomes — results depend on content, hosting, devices, and real traffic; Core Web Vitals status itself is determined by Google from field (RUM) data, not by lab tools.
 
 ```text
 BEFORE
@@ -86,6 +86,7 @@ seo-landing/
 │   ├── server-config.md  # Server config: caching, Brotli/gzip, security headers (Nginx/Apache)
 │   ├── video-facade.md   # Reference implementation of the "facade" pattern for YouTube
 │   └── map-facade.md     # Reference implementation of the "facade" pattern for map embeds
+├── benchmark/            # Lab benchmark disclosure: fixture, raw Lighthouse reports, methodology
 └── tests/
     └── fixtures/broken-landing/  # Negative fixture: every validator gate must fail on it
 ```
@@ -104,9 +105,9 @@ seo-landing/
 - **Common blocks without JS**: FAQ via `<details>`, slider via `scroll-snap`, modal via `<dialog>`
 - **Stop point**: before validation and the final report, the skill always asks the user to confirm the HTML version
 
-## Real-world result
+## Real-world result (lab measurements — not field Core Web Vitals)
 
-Lighthouse CLI measurements, mobile emulation. Original — an Angular SPA (102 requests); the same page rebuilt as static HTML with this skill (18 requests):
+One reproducible lab benchmark: Lighthouse CLI 13.4.1, mobile emulation, simulated throttling. Original — an Angular SPA (102 requests, 1 run); the same page rebuilt as static HTML with this skill (17–18 requests, median of 5 runs). Full disclosure — fixture, exact flags, raw JSON reports, timestamps, and aggregation method — is in [benchmark/README.md](./benchmark/README.md).
 
 | Metric | Original | Rebuilt | Gain |
 |---|---:|---:|---:|
@@ -114,10 +115,12 @@ Lighthouse CLI measurements, mobile emulation. Original — an Angular SPA (102 
 | Accessibility | 75 | **100** | +25 |
 | Best Practices | 73 | **100** | +27 |
 | LCP | 3.3 s | 1.6 s | −52% |
-| Total Blocking Time | 490 ms | 10 ms | −98% |
+| Total Blocking Time | 490 ms | 13 ms | −97% |
 | TTI | 9.4 s | 1.6 s | −83% |
-| Data transferred | 769 KiB | 111 KiB | −86% |
-| Requests | 102 | 18 | −82% |
+| Data transferred | 769 KiB | 110 KiB | −86% |
+| Requests | 102 | 17 | −83% |
+
+These are **lab** numbers for one before/after pair. They are not field Core Web Vitals (Google determines CWV status from CrUX/RUM field data at the 75th percentile, and Lighthouse cannot measure INP without real interaction), and they are not a guarantee that another page, host, device, or audience will reach the same results — the skill's targets are optimization goals, not promised outcomes.
 
 ## Installation
 
