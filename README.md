@@ -201,8 +201,8 @@ Once installed, the skill is picked up automatically by its description — just
 ## Usage
 
 1. Give the agent a brief: domain, language, topic and keywords, business type, CTA and contacts.
-2. The skill creates a separate project folder (`<workspace>/<project-slug>/`) with `index.html`, `robots.txt`, `sitemap.xml`, and `SERVER-SETUP.md`.
-3. At the stop point, confirm the HTML version — the skill then runs validation (W3C, JSON-LD, Lighthouse as automated evidence, plus required manual accessibility checks) and produces a report: LCP, PageSpeed scores, and the schema.org types used.
+2. The skill creates a separate project folder (`<workspace>/<project-slug>/`) with `index.html` and every local asset it references (all image variants, favicon), plus — conditionally — `styles.css` (deferred CSS only), `script.js` (when JS is used), `robots.txt`, `sitemap.xml`, `ASSETS.md`, and `SERVER-SETUP.md`. Missing source images are requested from the user, never invented.
+3. At the stop point, confirm the HTML version — the skill then runs validation (local asset/link existence, W3C, JSON-LD, Lighthouse as automated evidence, plus required manual accessibility checks) and produces a report: LCP, PageSpeed scores, and the schema.org types used.
 
 ## About the author
 

@@ -32,18 +32,24 @@ Required before generating anything:
 If domain or keywords are missing — ask first, do not invent them.
 
 ### 1. Create the project folder
-Every project lives in its own folder inside the workspace — **never write to the workspace root**:
+Every project lives in its own folder inside the workspace — **never write to the workspace root**. The output is a multi-file project: every local resource referenced by the HTML must exist as a real file.
 
 ```
 <workspace>/<project-slug>/
   index.html        # the generated landing page
-  images/           # local assets (AVIF/WebP/JPEG)
+  styles.css        # only when below-the-fold CSS is deferred (§1); absent when all CSS is inlined
+  script.js         # only when the page uses JS (§10); single file, defer
+  images/           # every image variant referenced in src/srcset/preload/OG tags (AVIF/WebP/JPEG, all breakpoints)
   favicon.png       # stable square brand icon, ≥48×48
   ASSETS.md         # rights & provenance record for every asset
   robots.txt
   sitemap.xml
   SERVER-SETUP.md   # hosting instructions
 ```
+
+Image branch:
+- Images provided in the brief → produce all required variants (AVIF/WebP/JPEG at every breakpoint named in `srcset`) from them.
+- No images available → request them from the user or omit the image/block. Never emit a successful-looking asset URL without producing the file or explicitly asking for it — a referenced-but-missing file is a generation failure, not a placeholder.
 
 ### 2. Generate the page
 Build `index.html` strictly following [references/tech-spec.md](./references/tech-spec.md) — 13 requirement sections (performance, HTML structure, SEO, security, CSS/fonts, forbidden list, testing, accessibility, embedded video, typical blocks, deferred widgets, content truthfulness & provenance, input sanitization & output encoding).
@@ -62,6 +68,7 @@ Show the generated page to the user and ask explicitly whether the HTML version 
 
 ### 5. Validate
 - W3C HTML validity.
+- Local asset/link existence: extract every local URL referenced by the output (img `src`/`srcset`, `<source>` `srcset`, preload `href`/`imagesrcset`, favicon, OG/Twitter images, CSS `url()`, script `src`) and verify each file exists in the project folder. Any missing referenced local resource is a hard failure — produce the file or remove the reference; never ship HTML pointing at files that were never created.
 - JSON-LD via a schema.org validator.
 - Lighthouse / PageSpeed: performance, SEO, accessibility, best-practices — automated audit evidence, never WCAG certification.
 - Manual accessibility checks (tech-spec §8) — no automated tool alone determines WCAG conformance: keyboard navigation, focus order/visibility, dialog focus flow, zoom/reflow, reduced motion, semantic name-role-value, alternative-text quality, and all interactive visual states. Record pass/fail evidence per applicable WCAG 2.1 AA criterion; report unresolved items instead of silently certifying them.
@@ -77,6 +84,7 @@ Briefly list:
 
 ## Main pitfalls
 - Never use external JS/CSS libraries, external fonts, or SVG images (tech-spec §6).
+- Never reference a local asset that was never created: every `src`/`srcset`/preload/OG URL must resolve to a real file in the project folder; missing source images are requested from the user, not invented (OUTPUT contract).
 - Never emit a raw brief value into markup: context-encode everything, reject `javascript:`/unexpected `data:` URLs, and self-test generation with hostile values (quotes, `</script>`, event-handler payloads) (tech-spec §13).
 - Never load YouTube iframes, maps, chats, subscription popups, or cookie banners on first load (tech-spec §9, §10, §11).
 - All content must exist in raw HTML — nothing rendered only by JS.

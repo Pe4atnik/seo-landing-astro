@@ -262,12 +262,12 @@ Every value collected in the brief (domain, keywords, business name, address, co
 - Generation self-test: run the generator with hostile brief values — quotes, angle brackets, a literal `</script>`, an `onerror=`/`onload=` payload, and `javascript:`/`data:` URLs. The output must remain valid HTML and execute none of them; a value that cannot be encoded safely for its context is rejected or omitted, never emitted raw.
 
 ## OUTPUT — canonical workflow order
-Generate the complete HTML code complying with ALL points above.
+Generate the complete multi-file project complying with ALL points above: `index.html`, every local asset it references (all image variants at every declared breakpoint, favicon), `styles.css` only when below-the-fold CSS is deferred, the single `script.js` only when JS is used, plus `robots.txt`, `sitemap.xml`, `ASSETS.md`, and `SERVER-SETUP.md`. A referenced file that is never created is a generation failure — produce it, or remove the reference (and request missing source images from the user rather than inventing URLs).
 
 One canonical sequence, shared with SKILL.md and README — do not reorder:
 1. Generate the draft, then self-check it against every requirement in this spec; fix violations before showing the draft.
 2. STOP POINT — show the draft to the user and ask explicitly whether the HTML version is OK. Do not run validation and do not report any metrics before the user approves.
-3. After approval: serve the page, then run validation — W3C HTML validity, JSON-LD schema validator, Lighthouse (performance, SEO, accessibility, best practices — automated evidence only), and the manual accessibility checks in §8.
+3. After approval: serve the page, then run validation — local asset/link existence (every local URL referenced by the output resolves to a real file in the project folder; any miss is a hard failure), W3C HTML validity, JSON-LD schema validator, Lighthouse (performance, SEO, accessibility, best practices — automated evidence only), and the manual accessibility checks in §8.
 4. Fix any failures found. If fixes change the approved HTML, obtain renewed approval before reporting.
 5. Final report — measured evidence only: LCP parameters, PageSpeed scores, schema.org types used.
 
