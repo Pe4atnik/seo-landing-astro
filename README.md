@@ -17,6 +17,8 @@ Build and improve landing pages with:
 - 📱 Mobile-first performance
 - 🤖 Semantic HTML
 
+🇷🇺 [Описание скила на русском языке](./README.ru.md)
+
 ## Works with AI coding agents
 
 Designed for agentic coding workflows and compatible with Agent Skills–style environments.
