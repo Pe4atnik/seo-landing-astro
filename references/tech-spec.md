@@ -88,7 +88,13 @@ Create a static HTML site focused on maximum performance and SEO.
 - Bypass mechanism (WCAG SC 2.4.1): when the output is part of a multi-page site sharing repeated header/navigation, emit a first-focusable "Skip to main content" link targeting a stable `<main>` ID; make it visible on focus and verify activation moves focus and scroll to the main content. A genuinely standalone one-page landing without repeated blocks does not need this conditional mechanism.
 - One responsive HTML, no duplicate content (mobile/desktop)
 - Heading hierarchy: one H1, then H2–H6 by logic
-- Language tag matching the content: `<html lang="en-US">` or equivalent
+- Language, direction, and locale are three separate inputs collected in the brief — never one value copied across formats:
+  - HTML language: a valid BCP-47 tag matching the content, on `<html>` (`lang="en-US"`, `lang="ar-SA"`).
+  - Base direction: `lang` does NOT set directionality (W3C). RTL documents must carry `dir="rtl"` on `<html>` (LTR is the default). An Arabic/Hebrew page without `dir="rtl"` breaks punctuation placement, alignment, controls, and form entry.
+  - Open Graph locale: `og:locale` uses the Open Graph format `language_TERRITORY` (ogp.me), e.g. `en_GB` — copying a hyphenated BCP-47 value like `en-US` into `og:locale` violates the advertised format.
+  - Mixed/unknown direction: for genuinely unknown mixed-direction values (user-entered strings, names), use `dir="auto"` on the containing element or `<bdi>` for inline isolation — never on the document root.
+  - Alternate versions: emit `hreflang`/alternate-locale metadata only when real localized equivalents exist at real URLs — never invent alternates for a single-language landing.
+  - RTL validation: on RTL documents, verify rendered RTL text containing Latin-script URLs, phone numbers, forms, and form controls at mobile and desktop widths — punctuation, alignment, input direction, and control layout must all remain correct.
 - Viewport: `<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">` — `viewport-fit=cover` ships ONLY together with the mandatory safe-area spacing rules in §5; a project that drops those rules must drop `viewport-fit=cover` with them.
 - Minify HTML, CSS and JS files: remove comments and extra whitespace
 
@@ -98,8 +104,9 @@ Create a static HTML site focused on maximum performance and SEO.
   - `<meta name="description" content="Unique keyword description up to 160 characters">`
   - `<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">`
   - `<link rel="canonical" href="https://site.com/">`
-- Open Graph: og:title, og:description, og:image, og:type, og:url, og:locale (plus og:image:width, og:image:height, og:image:alt)
+- Open Graph: og:title, og:description, og:image, og:type, og:url, og:locale (plus og:image:width, og:image:height, og:image:alt). `og:locale` follows the Open Graph `language_TERRITORY` format (ogp.me, e.g. `en_GB`) — it is a separate input from the BCP-47 `lang` attribute (§2), not a copy of it.
 - Twitter card: twitter:card, twitter:title, twitter:description, twitter:image
+- `hreflang`/alternate-locale links are emitted only when real localized equivalents exist at real URLs; a single-language landing gets none — invented alternates are a generation error (§2).
 - Favicon: a stable local square PNG/ICO of at least 48×48 (dimensions a multiple of 48px) plus `<link rel="icon" href="https://site.com/favicon.png">` on the home page. The asset must be brand-approved (or created with explicit permission), included in the project manifest, and verified to return 200 and remain crawlable. Meeting these rules makes the icon eligible for Google Search results — it does not guarantee display.
 - JSON-LD structured data (at the end of body):
   - `@type: WebSite` (with `name` and the canonical root `url`) only on the domain or subdomain home page, consistent with visible branding; omit it for subdirectory landings when the root home page is outside this project's scope. Never invent a site identity or use a subdirectory URL as the WebSite root.
@@ -146,6 +153,7 @@ Create a static HTML site focused on maximum performance and SEO.
   - `* { box-sizing: border-box; }`
   - `img { max-width: 100%; height: auto; display: block; }`
   - `.container { width: 100%; max-width: 1200px; margin: 0 auto; padding-inline: max(15px, env(safe-area-inset-left)) max(15px, env(safe-area-inset-right)); }`
+- Direction-aware layout: direction-dependent spacing, positioning, and alignment use logical CSS properties (`margin-inline`, `padding-inline`, `inset-inline-start/end`, `text-align: start/end`) rather than physical left/right, so RTL documents (`dir="rtl"`, §2) render correctly from the same stylesheet without a mirrored copy.
 - Safe-area spacing (paired with `viewport-fit=cover`, CSS env() spec): design spacing and system insets are COMBINED, never replaced — use `max(design-value, env(safe-area-inset-*))` or add them.
   - Every edge-aligned essential element gets safe-area-aware logical padding/margins: sticky/fixed headers (`padding-top: max(…, env(safe-area-inset-top))`), fixed/sticky bottom CTAs and controls (`padding-bottom: max(…, env(safe-area-inset-bottom))`), edge-to-edge footers, `<dialog>` panels, and any content flush to the left/right edges on landscape (`env(safe-area-inset-left/right)`).
   - Without this, `viewport-fit=cover` lets notches, rounded corners, and gesture-navigation bars obscure text and controls — readable/activatable targets are a hard requirement, so an unhandled inset is a generation failure.
@@ -171,7 +179,7 @@ Serving requirement: URL gates run against a served or deployed page, never agai
    Offline fallback (needs Node + Java): `npx vnu-jar index.html`.
 2. **Local asset existence**: extract every local URL referenced by the output (`src`, `href`, `srcset` candidates; skip `https?:`, `data:`, `mailto:`, `tel:`, `#`) and verify each resolves to a real file in the project folder. Any miss is a hard failure.
 3. **JSON-LD syntax**: parse every `application/ld+json` block as JSON (e.g. `python3 -m json.tool`). Syntax validity is NOT Google rich-result eligibility — eligibility is a separate Rich Results Test / URL Inspection step on the deployed page, and valid syntax alone is never reported as an achieved search feature.
-4. **Responsive layout**: headless Chrome screenshots at 320, 768, 1280, and 1920px — e.g. `chrome --headless=new --window-size=320,900 --screenshot=viewport-320.png <url>` — inspected for horizontal overflow, reflow, and broken controls at each width (320–1920 support per §2).
+4. **Responsive layout**: headless Chrome screenshots at 320, 768, 1280, and 1920px — e.g. `chrome --headless=new --window-size=320,900 --screenshot=viewport-320.png <url>` — inspected for horizontal overflow, reflow, and broken controls at each width (320–1920 support per §2). RTL documents are additionally inspected per §2: RTL text containing Latin-script URLs, phone numbers, forms, and controls must render correctly at mobile and desktop widths.
 5. **Lighthouse (lab measurement)**: pinned version and profile — `npx -y lighthouse@13.4.1 <url> --only-categories=performance,accessibility,best-practices,seo --output=json --output=html --output-path=reports/run-N` (mobile emulation, simulated throttling — Lighthouse defaults: 412×823 viewport, DPR 1.75, 150 ms RTT, 4× CPU slowdown). Run 3 times, aggregate the MEDIAN per category, threshold ≥ 90, artifacts kept at `reports/run-{1..3}.report.{json,html}` in the project folder. Lighthouse is lab evidence — never field Core Web Vitals (see README benchmark disclosure), and never WCAG certification.
 6. **Crawlability**: parse `sitemap.xml`, compare every `<loc>` with the HTML canonical, check the `Sitemap:` URL in `robots.txt`, and request both deployed files (HTTP 200).
 7. **Manual accessibility checks** (§8) — no automated gate replaces them.
