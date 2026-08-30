@@ -89,8 +89,8 @@ seo-landing/
 
 ## Key requirements enforced by the skill
 
-- **Performance**: LCP < 2.5s, INP < 100ms, CLS < 0.1; critical CSS inlined, the rest loaded async; `preload` + `fetchpriority="high"` for the LCP image
-- **Images**: AVIF → WebP → JPEG via `<picture>`, `srcset`/`sizes`, `width`/`height`, `loading="lazy"`, breakpoints 320–1920
+- **Performance**: LCP < 2.5s, INP < 100ms, CLS < 0.1; critical CSS inlined, the rest loaded async; the LCP image loads eagerly with `fetchpriority="high"` (a responsive `imagesrcset`/`imagesizes` preload only when measurement shows a benefit)
+- **Images**: AVIF → WebP → JPEG via `<picture>`, `srcset`/`sizes`, `width`/`height`, `loading="lazy"` for below-the-fold images only (never on the LCP image), breakpoints 320–1920
 - **SEO**: title/description/canonical/robots, Open Graph, Twitter Card, JSON-LD (`WebSite`, `Organization`, `BreadcrumbList`, `FAQPage`, `VideoObject` — emitted only when fact-backed and eligible for the corresponding Google search feature)
 - **Accessibility**: WCAG 2.1 AA, contrast ≥ 4.5:1, keyboard navigation, `prefers-reduced-motion`
 - **Security**: `X-Content-Type-Options`, `X-Frame-Options`, `Permissions-Policy`, `Referrer-Policy`, per-page CSP, staged HSTS, HTTPS enforcement, `rel="noopener noreferrer"`

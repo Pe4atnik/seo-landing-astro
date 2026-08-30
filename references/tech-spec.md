@@ -43,7 +43,8 @@ Create a static HTML site focused on maximum performance and SEO.
   - Default: inline ALL CSS (critical + below-the-fold) in `<head>` — landing CSS is usually small enough that deferral is not justified by measurement.
   - Only when measurement shows a real benefit: `<link rel="preload" href="styles.css" as="style">` plus `<link rel="stylesheet" href="styles.css" media="print">`, and switch `media` to `all` from the single deferred page script. Never use an inline `onload` handler on the link — it breaks under CSP and contradicts the script policy. Add a `<noscript><link rel="stylesheet" href="styles.css"></noscript>` fallback.
 - Verify full screen rendering with JavaScript disabled, under the enforced CSP, and after a stylesheet load failure
-- ALL images: AVIF with WebP/JPEG fallback via `<picture>`, lazy loading, `decoding="async"`, numeric width/height in pixels on every image
+- ALL images: AVIF with WebP/JPEG fallback via `<picture>`, `decoding="async"`, numeric width/height in pixels on every image
+- Loading timing is placement-based, never blanket: `loading="lazy"` belongs ONLY on below-the-fold images. The LCP/above-the-fold image never carries `loading="lazy"` — a lazy-loaded LCP image waits for the intersection observer and delays LCP (web.dev "Optimize LCP"); omit the attribute there (eager is the default) and set `fetchpriority="high"` on it instead.
 - Use `srcset` and `sizes` on all `<img>`
 - Calculate `sizes` from the container max-width
 - Responsive breakpoints: 320, 640, 768, 1024, 1280, 1920
@@ -53,7 +54,28 @@ Create a static HTML site focused on maximum performance and SEO.
 - Static assets are emitted with fingerprinted filenames — a content-hash fragment in the name (e.g. `styles.a1b2c3d4.css`, `hero.9f31c2ab.webp`). Only fingerprinted URLs may receive `Cache-Control: public, max-age=31536000, immutable`; every asset change must regenerate the hash and update all HTML references (including `srcset`) in the same commit. A stable (unhashed) URL must never be marked `immutable` — a compliant cache may serve the old bytes for the entire max-age after the file is overwritten (RFC 9111); stable URLs get a revalidation policy (`no-cache`) instead.
 - HTML: `max-age=0, must-revalidate`
 - Server instructions must specify Brotli (br) preferred, gzip fallback — and state the Brotli module prerequisite honestly: Nginx needs ngx_brotli installed/loaded (verify with `nginx -t` and an `Accept-Encoding: br` request), Apache's `mod_brotli` block is skipped when absent. When the module cannot be installed, ship gzip-only and record that explicitly — never claim Brotli that is not actually served (see references/server-config.md)
-- Preload the LCP image: `<link rel="preload" as="image" href="hero.webp" fetchpriority="high">`
+- LCP image — one canonical responsive recipe (above the fold, never lazy):
+
+```html
+<picture>
+  <source type="image/avif"
+    srcset="https://site.com/images/hero-320.avif 320w, https://site.com/images/hero-640.avif 640w, https://site.com/images/hero-768.avif 768w, https://site.com/images/hero-1024.avif 1024w, https://site.com/images/hero-1280.avif 1280w, https://site.com/images/hero-1920.avif 1920w"
+    sizes="(min-width: 1200px) 1200px, 100vw">
+  <source type="image/webp"
+    srcset="https://site.com/images/hero-320.webp 320w, https://site.com/images/hero-640.webp 640w, https://site.com/images/hero-768.webp 768w, https://site.com/images/hero-1024.webp 1024w, https://site.com/images/hero-1280.webp 1280w, https://site.com/images/hero-1920.webp 1920w"
+    sizes="(min-width: 1200px) 1200px, 100vw">
+  <img src="https://site.com/images/hero-1280.jpg"
+    srcset="https://site.com/images/hero-320.jpg 320w, https://site.com/images/hero-640.jpg 640w, https://site.com/images/hero-768.jpg 768w, https://site.com/images/hero-1024.jpg 1024w, https://site.com/images/hero-1280.jpg 1280w, https://site.com/images/hero-1920.jpg 1920w"
+    sizes="(min-width: 1200px) 1200px, 100vw"
+    alt="Concise purpose-based description" width="1280" height="640" fetchpriority="high" decoding="async">
+</picture>
+```
+
+  - `sizes` follows the container (§5 max-width 1200px → `(min-width: 1200px) 1200px, 100vw`); the identical `sizes` value must appear on every `<source>` and on the `<img>`.
+  - This image carries NO `loading` attribute (eager is the default) — `loading="lazy"` on the LCP image is forbidden.
+- Preloading the LCP image is NOT automatically required: an `<img>` present in the initial HTML is already discoverable by the preload scanner, and `fetchpriority="high"` is the primary priority signal. Add a preload only when the image is not directly discoverable (CSS background, JS-inserted) or measurement shows a benefit — then it must be responsive and match the first `<source>` so the browser fetches the same format/width it will render:
+  `<link rel="preload" as="image" fetchpriority="high" imagesrcset="https://site.com/images/hero-320.avif 320w, …, https://site.com/images/hero-1920.avif 1920w" imagesizes="(min-width: 1200px) 1200px, 100vw">`
+  A preload naming one fixed URL (e.g. `href="hero.webp"`) while `<picture>` renders a different format or width is forbidden — it produces an unused early request. When the rendered candidate cannot be matched safely (e.g. the audience includes browsers without AVIF support), omit the preload instead. Verify in DevTools that the preloaded response is the one the hero actually uses (no "preloaded but not used" warning).
 - Add `fetchpriority="high"` to the main image
 - ALL scripts (if any) must have the `defer` attribute and be placed before `</body>`
 - Absolute paths for ALL resources: `src="https://site.com/images/photo.webp"`
