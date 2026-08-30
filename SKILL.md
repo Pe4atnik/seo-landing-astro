@@ -10,13 +10,28 @@ metadata:
 Builds a static single-page HTML landing optimized for 100/100 PageSpeed and maximum SEO: critical CSS, AVIF images, full JSON-LD structured data, native-only interactivity, zero third-party requests on first load.
 
 ## When to Use
-- User asks for a landing page / one-pager focused on speed and SEO.
-- User provides a brief (ТЗ) and wants a production-ready static page.
-- User asks to audit or fix an existing landing against the performance checklist.
+- User asks for a landing page / one-pager focused on speed and SEO → **generate** mode.
+- User provides a brief (ТЗ) and wants a production-ready static page → **generate** mode.
+- User asks to audit an existing landing against the checklist without changes → **audit-only** mode (§0b, read-only, no project files).
+- User asks to fix/improve an existing landing → **fix-existing** mode (§0c).
 
 ## Procedure
 
-### 0. Collect the brief (ask if missing)
+### 0. Route the request to a mode first
+The skill serves three modes — pick one from the request (ask if ambiguous), because each mode collects different inputs and produces different output:
+
+- **generate** — build a new landing page from a brief ("build/create/generate a landing…"). Runs the full procedure below.
+- **audit-only** — read-only inspection of an existing page ("audit/check/review this landing against the checklist…", no changes requested). Runs §0b. Never writes project files.
+- **fix-existing** — apply targeted fixes to an existing page ("fix/improve/optimize this page…"). Runs §0c.
+
+Representative routing:
+- "Build a landing for a dental clinic from this brief" → **generate**.
+- "Audit https://example.com/ against the performance checklist and report what's wrong" → **audit-only**.
+- "This landing's hero image shifts on load — fix it" → **fix-existing**.
+
+Generation-only brief fields (target keywords, business type, CTA, media facts) are collected ONLY for generate and rebuild work. An audit or a targeted fix must not be blocked or delayed by missing generation inputs, and audit-only mode must not create or modify any project files.
+
+### 0a. Collect the brief (generate mode; ask if missing)
 Required before generating anything:
 - Domain / final URL — for canonical, og:url, absolute paths, JSON-LD `@id`.
 - Site identity (for `WebSite` markup, only when the page is the domain/subdomain home page): preferred site name, optional alternate names, and the canonical home URL — collected separately from the landing URL.
@@ -30,6 +45,25 @@ Required before generating anything:
 - Whether images are provided; whether FAQ / reviews / video blocks are needed. For a video block collect source-backed facts: video URL/ID, title, description, accurate first-publication date/time with timezone, and a unique crawlable thumbnail (plus `contentUrl` when applicable). Never invent missing media facts.
 
 If domain or keywords are missing — ask first, do not invent them.
+
+### 0b. Audit-only mode (read-only)
+Audit an existing page without generating a replacement. No project files are created or modified in this mode — the deliverable is a report.
+
+1. Identify the target: a deployed URL (preferred — lets every check run against reality) or local HTML files. If neither is supplied, ask; never guess the target.
+2. Run the applicable checks from §5 against the target as-is: W3C validity, local asset existence (for local files), JSON-LD via a schema.org validator, Lighthouse against the served/deployed URL, crawlability contract (robots.txt + sitemap.xml at the deployed host), and the manual accessibility checks in tech-spec §8.
+3. Report evidence per check: pass/fail with the measured value or observed markup, and the exact command/tool used. Where a check cannot run (no deployed URL for Lighthouse, no robots.txt on the host), report a blocker for that check — do not estimate, extrapolate, or omit it silently.
+4. Distinguish syntax validity from Google feature eligibility (FAQPage, VideoObject, rich results): valid markup is reported as valid markup, never as an achieved search feature.
+5. Optionally end with a prioritized fix list. Applying fixes is a separate **fix-existing** request — do not start editing without it.
+
+### 0c. Fix-existing mode
+Apply targeted fixes to an existing page without a full rebuild.
+
+1. Identify the page/files and the specific problems to fix; collect only the inputs those fixes need (never the full generation brief).
+2. Apply each fix per the relevant tech-spec section, preserving unrelated markup and content.
+3. STOP POINT (§4) applies: show the changed page before validation. If fixes change what the user approved earlier, obtain renewed approval before reporting.
+4. Validate the changed page (§5) and report measured evidence only.
+
+## Generation workflow (generate mode)
 
 ### 1. Create the project folder
 Every project lives in its own folder inside the workspace — **never write to the workspace root**. The output is a multi-file project: every local resource referenced by the HTML must exist as a real file.
