@@ -158,10 +158,26 @@ Create a static HTML site focused on maximum performance and SEO.
 - iframe (exceptions: maps and YouTube video — both ONLY via the facade pattern: a local screenshot/cover in the initial DOM, the iframe inserted on explicit user activation; see §9 and §10. A native `loading="lazy"` map iframe is NOT an exception — it can load automatically when approaching the viewport, without any click)
 - `document.write()`, synchronous scripts
 
-## 7. TESTING
-- Valid HTML per W3C
-- Correct display at all sizes from 320px to 1920px
-- Support for all modern browsers
+## 7. TESTING — executable validation contract
+Validation is a set of pinned, runnable gates. Every gate prints/runs an exact command, produces a measured result, and either passes, fails, or reports an explicit BLOCKER. A gate that cannot run (missing tool, no served URL) is a BLOCKER — never an estimated or fabricated pass.
+
+Prerequisites: `curl`, `python3`; URL gates additionally need Node.js ≥ 18 (`npx`) and Chrome/Chromium (override the binary with `CHROME_PATH`).
+
+Serving requirement: URL gates run against a served or deployed page, never against a file path. Serve the project directory (e.g. `python3 -m http.server 8000` inside it → `http://localhost:8000/index.html`) or use the deployed URL.
+
+1. **W3C HTML validity** (pass = zero `"type": "error"` messages):
+   `curl -sS -H "Content-Type: text/html; charset=utf-8" --data-binary @index.html "https://validator.w3.org/nu/?out=json"`
+   Offline fallback (needs Node + Java): `npx vnu-jar index.html`.
+2. **Local asset existence**: extract every local URL referenced by the output (`src`, `href`, `srcset` candidates; skip `https?:`, `data:`, `mailto:`, `tel:`, `#`) and verify each resolves to a real file in the project folder. Any miss is a hard failure.
+3. **JSON-LD syntax**: parse every `application/ld+json` block as JSON (e.g. `python3 -m json.tool`). Syntax validity is NOT Google rich-result eligibility — eligibility is a separate Rich Results Test / URL Inspection step on the deployed page, and valid syntax alone is never reported as an achieved search feature.
+4. **Responsive layout**: headless Chrome screenshots at 320, 768, 1280, and 1920px — e.g. `chrome --headless=new --window-size=320,900 --screenshot=viewport-320.png <url>` — inspected for horizontal overflow, reflow, and broken controls at each width (320–1920 support per §2).
+5. **Lighthouse (lab measurement)**: pinned version and profile — `npx -y lighthouse@13.4.1 <url> --only-categories=performance,accessibility,best-practices,seo --output=json --output=html --output-path=reports/run-N` (mobile emulation, simulated throttling — Lighthouse defaults: 412×823 viewport, DPR 1.75, 150 ms RTT, 4× CPU slowdown). Run 3 times, aggregate the MEDIAN per category, threshold ≥ 90, artifacts kept at `reports/run-{1..3}.report.{json,html}` in the project folder. Lighthouse is lab evidence — never field Core Web Vitals (see README benchmark disclosure), and never WCAG certification.
+6. **Crawlability**: parse `sitemap.xml`, compare every `<loc>` with the HTML canonical, check the `Sitemap:` URL in `robots.txt`, and request both deployed files (HTTP 200).
+7. **Manual accessibility checks** (§8) — no automated gate replaces them.
+
+Failure behavior: fix every gate failure before reporting. Report each number with the exact command and artifact path that produced it; where a gate cannot run, report `BLOCKER: <reason>` in place of a number. Never output a PageSpeed/LCP score that was not actually measured on the served page.
+
+Negative fixture: `tests/fixtures/broken-landing/index.html` ships three intentional failures — a duplicate attribute (gate 1), a reference to a missing image file (gate 2), and a trailing comma in JSON-LD (gate 3). Gates 1–3 must each FAIL on it; a gate that passes the fixture is itself broken and must be fixed before any project validation is trusted.
 
 ## 8. ACCESSIBILITY AND INCLUSIVITY
 - WCAG 2.1 Level AA compliance
@@ -277,10 +293,10 @@ Generate the complete multi-file project complying with ALL points above: `index
 One canonical sequence, shared with SKILL.md and README — do not reorder:
 1. Generate the draft, then self-check it against every requirement in this spec; fix violations before showing the draft.
 2. STOP POINT — show the draft to the user and ask explicitly whether the HTML version is OK. Do not run validation and do not report any metrics before the user approves.
-3. After approval: serve the page, then run validation — local asset/link existence (every local URL referenced by the output resolves to a real file in the project folder; any miss is a hard failure), W3C HTML validity, JSON-LD schema validator, Lighthouse (performance, SEO, accessibility, best practices — automated evidence only), and the manual accessibility checks in §8.
+3. After approval: serve the page, then run the executable validation contract (§7) — local asset/link existence (every local URL referenced by the output resolves to a real file in the project folder; any miss is a hard failure), W3C HTML validity, JSON-LD syntax, responsive screenshots, Lighthouse (pinned version, 3 runs, median, artifacts kept), the crawlability contract, and the manual accessibility checks in §8.
 4. Fix any failures found. If fixes change the approved HTML, obtain renewed approval before reporting.
 5. Final report — measured evidence only: LCP parameters, PageSpeed scores, schema.org types used.
 
 Rules:
 - Never claim LCP/PageSpeed numbers before the corresponding check has actually run on the served page.
-- Do not mention the verification process in the final answer.
+- Every reported number is disclosed with the exact command and artifact path that produced it; a gate that could not run is reported as `BLOCKER: <reason>` instead of a number. A score that was not measured is never reported.

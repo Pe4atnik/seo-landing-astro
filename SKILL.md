@@ -101,14 +101,16 @@ For embedded YouTube video use the facade pattern only: rules in tech-spec §9, 
 Show the generated page to the user and ask explicitly whether the HTML version is OK. **Do not proceed to validation and the final report until the user confirms.** If there are remarks — fix and ask again.
 
 ### 5. Validate
-- W3C HTML validity.
+Run the executable validation contract from tech-spec §7 — pinned commands against the served page, measured results only, explicit BLOCKER when a gate cannot run:
+- W3C HTML validity (Nu validator, JSON output; zero errors).
 - Local asset/link existence: extract every local URL referenced by the output (img `src`/`srcset`, `<source>` `srcset`, preload `href`/`imagesrcset`, favicon, OG/Twitter images, CSS `url()`, script `src`) and verify each file exists in the project folder. Any missing referenced local resource is a hard failure — produce the file or remove the reference; never ship HTML pointing at files that were never created.
-- JSON-LD via a schema.org validator.
-- Lighthouse / PageSpeed: performance, SEO, accessibility, best-practices — automated audit evidence, never WCAG certification.
+- JSON-LD syntax (JSON parse) — separate from Google rich-result eligibility, which is checked with Rich Results Test on the deployed page.
+- Responsive screenshots at 320/768/1280/1920px, inspected for overflow and reflow.
+- Lighthouse: pinned version/profile, 3 runs, median per category, threshold ≥ 90, artifacts kept in the project's `reports/` — lab evidence only, never field Core Web Vitals and never WCAG certification.
 - Manual accessibility checks (tech-spec §8) — no automated tool alone determines WCAG conformance: keyboard navigation, focus order/visibility, dialog focus flow, zoom/reflow, reduced motion, semantic name-role-value, alternative-text quality, and all interactive visual states. Record pass/fail evidence per applicable WCAG 2.1 AA criterion; report unresolved items instead of silently certifying them.
 - Crawlability contract: parse `sitemap.xml`, compare every `<loc>` with the HTML canonical, check the `Sitemap:` URL in `robots.txt`, and request both deployed files successfully (HTTP 200).
 
-Fix any violations found before reporting. Do not mention the verification process in the final answer.
+Fix any violations found before reporting. Disclose evidence honestly: every reported number comes with the exact command and artifact path that produced it; a gate that could not run is reported as `BLOCKER: <reason>` instead of a number. Never output a PageSpeed/LCP score that was not actually measured.
 
 ### 6. Final report
 Briefly list:

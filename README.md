@@ -80,12 +80,14 @@ Format — [Agent Skills](https://agentskills.io) (open standard originally deve
 
 ```
 seo-landing/
-├── SKILL.md              # Main workflow: brief → generation → stop point → validation → report
-└── references/
-    ├── tech-spec.md      # Technical spec (13 requirement sections)
-    ├── server-config.md  # Server config: caching, Brotli/gzip, security headers (Nginx/Apache)
-    ├── video-facade.md   # Reference implementation of the "facade" pattern for YouTube
-    └── map-facade.md     # Reference implementation of the "facade" pattern for map embeds
+├── SKILL.md              # Main workflow: mode routing → brief → generation → stop point → validation → report
+├── references/
+│   ├── tech-spec.md      # Technical spec (13 requirement sections + executable validation contract)
+│   ├── server-config.md  # Server config: caching, Brotli/gzip, security headers (Nginx/Apache)
+│   ├── video-facade.md   # Reference implementation of the "facade" pattern for YouTube
+│   └── map-facade.md     # Reference implementation of the "facade" pattern for map embeds
+└── tests/
+    └── fixtures/broken-landing/  # Negative fixture: every validator gate must fail on it
 ```
 
 ## Key requirements enforced by the skill
