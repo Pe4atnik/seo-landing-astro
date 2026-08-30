@@ -4,19 +4,36 @@ Load only the cover image; start loading the video only on click.
 
 ## HTML
 
+The example below shows a below-the-fold video, hence `loading="lazy"` on the
+cover. Placement decides loading (tech-spec §9): when the cover is the LCP
+element or sits above the fold, remove `loading="lazy"` (eager is the default)
+and add `fetchpriority="high"` to the `<img>` instead.
+
 ```html
 <div class="video-facade" data-video-id="dQw4w9WgXcQ">
   <picture>
-    <source type="image/avif" srcset="https://site.com/images/video-cover.avif">
-    <source type="image/webp" srcset="https://site.com/images/video-cover.webp">
-    <img src="https://site.com/images/video-cover.jpg" alt="Video cover: Video title — Video block"
-         width="1280" height="720" loading="lazy" decoding="async">
+    <source type="image/avif"
+      srcset="https://site.com/images/video-cover-320.avif 320w, https://site.com/images/video-cover-640.avif 640w, https://site.com/images/video-cover-768.avif 768w, https://site.com/images/video-cover-1024.avif 1024w, https://site.com/images/video-cover-1280.avif 1280w, https://site.com/images/video-cover-1920.avif 1920w"
+      sizes="(min-width: 1200px) 1200px, 100vw">
+    <source type="image/webp"
+      srcset="https://site.com/images/video-cover-320.webp 320w, https://site.com/images/video-cover-640.webp 640w, https://site.com/images/video-cover-768.webp 768w, https://site.com/images/video-cover-1024.webp 1024w, https://site.com/images/video-cover-1280.webp 1280w, https://site.com/images/video-cover-1920.webp 1920w"
+      sizes="(min-width: 1200px) 1200px, 100vw">
+    <img src="https://site.com/images/video-cover-1280.jpg"
+      srcset="https://site.com/images/video-cover-320.jpg 320w, https://site.com/images/video-cover-640.jpg 640w, https://site.com/images/video-cover-768.jpg 768w, https://site.com/images/video-cover-1024.jpg 1024w, https://site.com/images/video-cover-1280.jpg 1280w, https://site.com/images/video-cover-1920.jpg 1920w"
+      sizes="(min-width: 1200px) 1200px, 100vw"
+      alt="Video cover: Video title — Video block"
+      width="1280" height="720" loading="lazy" decoding="async">
   </picture>
   <button class="video-play" type="button" aria-label="Watch video: Video title">
     <span class="video-play-icon" aria-hidden="true"></span>
   </button>
 </div>
 ```
+
+`sizes` must equal the facade container width (here the §5 container cap of
+1200px) and must be identical on every `<source>` and the `<img>`. Verify at
+320, 640, 1024, and 1920px viewports that the browser picks the intended
+candidate in each case.
 
 ## CSS (play icon without SVG)
 

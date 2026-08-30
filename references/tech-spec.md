@@ -170,8 +170,10 @@ Create a static HTML site focused on maximum performance and SEO.
 - Forbidden to load a YouTube iframe on page load — only on user click.
 - Before the click show ONLY the video cover:
   - `<picture>` with a local cover in AVIF/WebP + JPEG fallback (no hotlinking from i.ytimg.com — extra domain, blocked by ad blockers);
+  - width-descriptor `srcset` (320–1920w per §1 breakpoints) plus an accurate `sizes` derived from the facade container, on every `<source>` and the `<img>`;
   - numeric width/height + CSS `aspect-ratio: 16/9` (CLS prevention);
-  - `loading="lazy"`, `decoding="async"`, srcset/sizes per §1 rules.
+  - `decoding="async"`;
+  - loading by placement, never hardcoded: when the cover is the LCP element or sits above the fold, load it eagerly (no `loading` attribute) with `fetchpriority="high"`; use `loading="lazy"` only when the video block is below the fold. Verify candidate selection at representative 320, 640, 1024, and 1920px viewports — each must pick the intended candidate, not an oversized one.
 - Play button over the cover:
   - a real `<button>` (not a div), keyboard accessible (Enter/Space);
   - `aria-label="Watch video: <title>"`;

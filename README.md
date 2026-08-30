@@ -97,7 +97,7 @@ seo-landing/
 - **Fonts**: system fonts only — no external fonts, no Google Fonts
 - **JS budget ≤ 15 KB** for the whole page, one file with `defer`
 - **Forbidden**: external JS/CSS libraries, SVG images, synchronous scripts, iframes on first load
-- **Video & maps**: "facade" pattern only — the cover image loads immediately, the iframe loads on click
+- **Video & maps**: "facade" pattern only — the cover is a local responsive image (eager when it is the LCP/above the fold, lazy below the fold), the iframe loads only on click
 - **Common blocks without JS**: FAQ via `<details>`, slider via `scroll-snap`, modal via `<dialog>`
 - **Stop point**: before validation and the final report, the skill always asks the user to confirm the HTML version
 
