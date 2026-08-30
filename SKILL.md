@@ -39,7 +39,7 @@ Required before generating anything:
 - Page language and locale — for `lang` and `og:locale`.
 - Topic + 1–3 target keywords — for H1, title, description.
 - Business type: Organization or LocalBusiness. For LocalBusiness collect the verified public/legal business name and the complete structured postal address (street, locality, region, postal code, country), plus phone and geo coordinates. Also collect the verified schema.org subtype(s) based on the actual business (e.g. `Restaurant`, `Dentist`, `HardwareStore`) — never chosen from target keywords. Never invent missing identity facts: fall back to `Organization` markup or omit entity markup until the facts are provided.
-- CTA and contacts (phone, form, messengers).
+- CTA and contacts (phone, form, messengers). When a form is requested, also collect its submission destination and method (a first-party endpoint or a documented form service — never invented), the consent/privacy text required for the collected personal data, and where submissions are stored and who owns them; with no destination, the form is omitted or explicitly stubbed (tech-spec §10 form submission contract).
 - A brand-approved favicon or explicit permission to create one — never invent a brand mark silently.
 - Approved source material and a claim owner for objective marketing facts (numbers, prices, qualifications, guarantees, comparisons, case studies) — without them such claims are omitted, never invented.
 - Whether images are provided; whether FAQ / reviews / video blocks are needed. For a video block collect source-backed facts: video URL/ID, title, description, accurate first-publication date/time with timezone, and a unique crawlable thumbnail (plus `contentUrl` when applicable). Never invent missing media facts.
