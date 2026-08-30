@@ -127,20 +127,27 @@ git clone https://github.com/aleksandr-alhoff/seo-landing.git
 
 ### Global (available in all projects)
 
+Every recipe below is self-contained: it creates its destination directory first, then copies the skill into it. Each one must exit with status `0` and leave the layout `<skills-dir>/seo-landing/SKILL.md` in place.
+
 ```bash
 # VS Code Copilot
+mkdir -p ~/.copilot/skills
 cp -R seo-landing ~/.copilot/skills/
 
 # Claude Code
+mkdir -p ~/.claude/skills
 cp -R seo-landing ~/.claude/skills/
 
 # OpenAI Codex CLI / ChatGPT desktop
+mkdir -p ~/.agents/skills
 cp -R seo-landing ~/.agents/skills/
 
 # Cursor
+mkdir -p ~/.cursor/skills
 cp -R seo-landing ~/.cursor/skills/
 
 # Gemini CLI
+mkdir -p ~/.gemini/skills
 cp -R seo-landing ~/.gemini/skills/
 
 # Google Antigravity
