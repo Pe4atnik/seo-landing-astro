@@ -77,23 +77,19 @@ document.addEventListener('click', function (e) {
   box.appendChild(iframe);
   iframe.focus();
 });
-
-/* preconnect only on hover */
-document.querySelectorAll('.video-facade').forEach(function (box) {
-  box.addEventListener('pointerenter', function () {
-    if (document.querySelector('link[href*="youtube-nocookie"]')) return;
-    var l = document.createElement('link');
-    l.rel = 'preconnect';
-    l.href = 'https://www.youtube-nocookie.com';
-    document.head.appendChild(l);
-  }, { once: true, passive: true });
-});
 ```
+
+There is deliberately NO preconnect handler here. A hover/focus preconnect
+would perform third-party DNS/connection work before user intent and expose
+the visitor's network address to YouTube — contradicting the guarantee below.
+Keyboard (Enter/Space) and pointer activation both reach the single delegated
+click handler, so both follow the same network policy: first contact with
+`youtube-nocookie.com` is the iframe insertion itself.
 
 ## Notes
 - Store the cover locally in `images/` (AVIF/WebP/JPEG) — never hotlink `i.ytimg.com`.
 - One delegated handler covers any number of videos.
-- Before the click: zero requests to YouTube (~0.5–1 MB of JS and dozens of connections avoided).
+- Before activation (click or Enter/Space): zero requests to YouTube — no preconnect, no DNS, no connection setup; hovering or keyboard-focusing the cover contacts nothing. Verify in DevTools: filter `youtube-nocookie.com`, load the page, hover/focus without activating → zero requests; activate → the embed request appears. After activation the embed still avoids ~0.5–1 MB of JS and dozens of connections that an immediate embed would have caused on page load.
 - CLS = 0: fixed `aspect-ratio: 16/9` and numeric `width/height`.
 - The video ID is untrusted input: it is validated against `^[A-Za-z0-9_-]{11}$` at generation time (tech-spec §13) and again before the iframe URL is built — a malformed ID must fail generation, not reach the DOM.
 - Third-party governance (tech-spec §11): the YouTube embed is a documented dependency — record origin, activation moment (click only), CSP `frame-src`/`connect-src` destination, and subrequests in the per-page manifest. `referrerPolicy="no-referrer"` is set on the iframe so the landing URL is never sent to YouTube. `sandbox` is a documented incompatibility for this embed: YouTube playback requires `allow-scripts` + `allow-same-origin` together, which equals no sandbox — record that justification instead of adding a no-op sandbox. Verify after deployment: playback starts on click, and fullscreen works.

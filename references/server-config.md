@@ -255,8 +255,9 @@ Feature-specific additions:
   Never fall back to `style-src 'unsafe-inline'` as the default; and NEVER use
   `unsafe-inline` or `unsafe-eval` for `script-src`.
 - YouTube facade block present: add `https://www.youtube-nocookie.com` to
-  `frame-src` (iframe inserted on click) and to `connect-src` (the hover
-  preconnect). Omit both when the page has no video.
+  `frame-src` (iframe inserted on click). `connect-src` needs no YouTube entry
+  — the facade performs no fetch/preconnect to that origin before activation.
+  Omit the entry when the page has no video.
 - Form submitting to an external endpoint from the brief: extend
   `form-action` with that exact origin. Default is `'self'`.
 - `data:` in `img-src` covers base64 LQIP placeholders; drop it when unused.
@@ -479,7 +480,7 @@ Verification:
 - [ ] Two-version deploy check: publish asset version A, deploy version B (new hash + updated HTML references), reload from a warm cache — version B loads immediately, no stale styles/scripts/images
 - [ ] HTML revalidated on every request
 - [ ] All four security headers present on every response class — verify with `curl -I` against `/`, a `.css` file, a `.js` file, and a nonexistent URL (404); each response carries exactly one copy of all four headers (no duplicates, none missing on error responses or Nginx asset locations)
-- [ ] CSP generated for this page's exact feature set; deployed report-only first, browser-tested across every feature combination with zero unexpected violations, then enforced; no `unsafe-inline`/`unsafe-eval` in `script-src`; `youtube-nocookie.com` present in `frame-src`/`connect-src` only when the video block exists
+- [ ] CSP generated for this page's exact feature set; deployed report-only first, browser-tested across every feature combination with zero unexpected violations, then enforced; no `unsafe-inline`/`unsafe-eval` in `script-src`; `youtube-nocookie.com` present in `frame-src` only when the video block exists
 - [ ] HTTPS enforced: TLS certificate installed, HTTPS endpoint serves the site, and a port-80 vhost/server block issues exactly one 301/308 preserving host/path/query to the canonical host. Verify deployed: `curl -I 'http://<host>/path?q=1'` returns the single redirect to the expected HTTPS URL, and the HTTPS request succeeds
 - [ ] HSTS deployed in stages: short `max-age` first, long lifetime only after clean rollout; header present exactly once on HTTPS responses and absent on the HTTP redirect (verify with `curl -I`); `includeSubDomains` only when every subdomain is HTTPS-capable; `preload` only with the user's explicit recorded consent. HSTS supplements, never replaces, the HTTP→HTTPS redirect
 - [ ] HTML responses carry `Content-Type: text/html; charset=utf-8` (verify with `curl -I`); `<meta charset="utf-8">` present within the first 1024 bytes; representative non-ASCII text, metadata and JSON-LD render correctly
