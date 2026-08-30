@@ -87,7 +87,7 @@ Create a static HTML site focused on maximum performance and SEO.
 - One responsive HTML, no duplicate content (mobile/desktop)
 - Heading hierarchy: one H1, then H2–H6 by logic
 - Language tag matching the content: `<html lang="en-US">` or equivalent
-- Viewport: `<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">`
+- Viewport: `<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">` — `viewport-fit=cover` ships ONLY together with the mandatory safe-area spacing rules in §5; a project that drops those rules must drop `viewport-fit=cover` with them.
 - Minify HTML, CSS and JS files: remove comments and extra whitespace
 
 ## 3. SEO OPTIMIZATION
@@ -143,7 +143,11 @@ Create a static HTML site focused on maximum performance and SEO.
 - CLS prevention:
   - `* { box-sizing: border-box; }`
   - `img { max-width: 100%; height: auto; display: block; }`
-  - `.container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 15px; }`
+  - `.container { width: 100%; max-width: 1200px; margin: 0 auto; padding-inline: max(15px, env(safe-area-inset-left)) max(15px, env(safe-area-inset-right)); }`
+- Safe-area spacing (paired with `viewport-fit=cover`, CSS env() spec): design spacing and system insets are COMBINED, never replaced — use `max(design-value, env(safe-area-inset-*))` or add them.
+  - Every edge-aligned essential element gets safe-area-aware logical padding/margins: sticky/fixed headers (`padding-top: max(…, env(safe-area-inset-top))`), fixed/sticky bottom CTAs and controls (`padding-bottom: max(…, env(safe-area-inset-bottom))`), edge-to-edge footers, `<dialog>` panels, and any content flush to the left/right edges on landscape (`env(safe-area-inset-left/right)`).
+  - Without this, `viewport-fit=cover` lets notches, rounded corners, and gesture-navigation bars obscure text and controls — readable/activatable targets are a hard requirement, so an unhandled inset is a generation failure.
+  - Test both portrait and landscape on representative cutout/gesture-navigation viewports (e.g. Chrome DevTools device emulation with safe-area insets); verify no essential content or control sits under an inset.
 
 ## 6. FORBIDDEN
 - External JS libraries (jQuery, React, Vue, etc.)
