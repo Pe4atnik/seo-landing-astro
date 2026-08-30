@@ -2,6 +2,11 @@
 
 Load only the cover image; start loading the video only on click.
 
+## Google video discovery trade-off (read first)
+This pattern is click-only: the rendered HTML contains a cover and a button, and the iframe exists only after activation. Google discovers videos through `<video>`, `<embed>`, `<iframe>`, and `<object>` elements in the rendered HTML and warns that video loading must not depend on user actions such as clicking (developers.google.com/search/docs/appearance/video). The facade therefore deliberately trades Google video discovery and video-feature eligibility for zero third-party requests before activation:
+- Do not claim video-search optimization for a facade-only page; `VideoObject` on such a page is optional metadata, reported as metadata-only (tech-spec §9 reporting gate).
+- When video search traffic matters, choose the SEO-discoverable mode instead (self-hosted `<video>` or a documented direct embed — tech-spec §9 Mode S). A dedicated watch page is Google's further recommendation for video-feature eligibility and is out of scope for a single landing.
+
 ## HTML
 
 The example below shows a below-the-fold video, hence `loading="lazy"` on the

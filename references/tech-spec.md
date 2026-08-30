@@ -25,7 +25,7 @@ repeating the version number — a number that exists in one place cannot diverg
 - 6. Forbidden
 - 7. Testing
 - 8. Accessibility and inclusivity
-- 9. Embedded video (facade pattern only)
+- 9. Embedded video (facade by default; SEO-discoverable mode opt-in)
 - 10. Typical blocks without speed loss
 - 11. Deferred widgets
 - 12. Content truthfulness & provenance
@@ -156,7 +156,7 @@ Create a static HTML site focused on maximum performance and SEO.
 - External CSS frameworks (Bootstrap, Tailwind)
 - SVG images
 - External fonts
-- iframe (exceptions: maps and YouTube video — both ONLY via the facade pattern: a local screenshot/cover in the initial DOM, the iframe inserted on explicit user activation; see §9 and §10. A native `loading="lazy"` map iframe is NOT an exception — it can load automatically when approaching the viewport, without any click)
+- iframe (exceptions: maps — ONLY via the facade pattern, a local screenshot in the initial DOM with the iframe inserted on explicit user activation (§10); YouTube video — via the facade pattern by default, or as a first-load embed ONLY under the explicitly documented SEO-discoverable mode chosen in the brief (§9 Mode S). A native `loading="lazy"` map iframe is NOT an exception — it can load automatically when approaching the viewport, without any click)
 - `document.write()`, synchronous scripts
 
 ## 7. TESTING — executable validation contract
@@ -188,7 +188,18 @@ Negative fixture: `tests/fixtures/broken-landing/index.html` ships three intenti
 - All interactive elements keyboard accessible
 - Manual accessibility verification is required before claiming WCAG 2.1 AA — no automated tool alone determines conformance (W3C). Required manual checks: keyboard navigation, focus order and visibility, dialog/modal focus flow, zoom/reflow, reduced motion, semantic name-role-value, alternative-text quality, and all interactive visual states. Lighthouse accessibility output is automated audit evidence, not certification. Record pass/fail evidence per applicable WCAG 2.1 AA criterion and report unresolved items rather than silently certifying them.
 
-## 9. EMBEDDED VIDEO (facade pattern only)
+## 9. EMBEDDED VIDEO (facade by default; SEO-discoverable mode opt-in)
+
+### Video modes — chosen in the brief, trade-off stated in the report
+Google discovers videos through `<video>`, `<embed>`, `<iframe>`, and `<object>` elements present in the RENDERED HTML, and warns that video loading must not depend on user actions such as clicking, scrolling, or typing (developers.google.com/search/docs/appearance/video). The mode is collected in the brief and disclosed in the final report — never switched silently.
+
+- **Mode F — click-only facade (default).** The facade rules below. Buys zero third-party requests before activation and avoids ~0.5–1 MB of player JS on load; the price is explicit: the rendered HTML contains no video element before activation, so the page does NOT satisfy Google's video discovery requirements. Make no video-discovery or video-feature claims for Mode F pages; `VideoObject` there is optional metadata, reported as metadata-only (see the reporting gate below).
+- **Mode S — SEO-discoverable (opt-in, when video search traffic matters).** The video element must exist in the rendered HTML without any user action. Two supported variants:
+  - **S1 — self-hosted `<video>` (preferred):** a first-party `<video>` element with a Google-supported container format (MP4/WebM among them), a stable video URL, a `poster` thumbnail, numeric dimensions, and no user-action gate. Stays fully compatible with the zero-third-party-requests policy; the cost is hosting/bandwidth for the video file, and Googlebot must be able to fetch it (never blocked in robots.txt).
+  - **S2 — direct `<iframe>` embed:** the YouTube (nocookie) iframe sits in the initial HTML, discoverable via `<iframe>` in the rendered HTML. It IS a first-load third-party dependency: record it in the dependency manifest (§11), add the CSP `frame-src` entry, and stop claiming "zero third-party requests on first load" for that page. The relaxation is explicit and documented, never silent.
+  - Watch-page honesty: Google further recommends a dedicated watch page for video-feature eligibility (key moments, previews, live badge) and does not count pages where the video merely supplements other content — most landings are exactly that. Even Mode S on a landing makes the video DISCOVERABLE; feature eligibility may additionally require a real watch page, which is outside a single-landing project unless the user builds one.
+
+### Facade rules (Mode F)
 - Forbidden to load a YouTube iframe on page load — only on user click.
 - Before the click show ONLY the video cover:
   - `<picture>` with a local cover in AVIF/WebP + JPEG fallback (no hotlinking from i.ytimg.com — extra domain, blocked by ad blockers);
@@ -210,7 +221,10 @@ Negative fixture: `tests/fixtures/broken-landing/index.html` ships three intenti
 - No preconnect or other early contact with `https://www.youtube-nocookie.com`: a hover/focus preconnect performs third-party DNS/connection work before user intent and exposes the visitor's network address to that origin, contradicting the zero-requests-before-activation guarantee. The first contact with the YouTube origin is the iframe insertion on activation. Keyboard (Enter/Space) and pointer activation follow the same network policy — one delegated click handler covers both.
 - Network test (browser, before reporting): open DevTools Network, filter `youtube-nocookie.com`, load the page, hover and keyboard-focus the cover without activating — zero requests; activate — the embed request appears.
 - All pattern scripts — in one file with `defer` before `</body>`, no external libraries; for multiple videos use one delegated handler.
-- If a video is actually on the page, add `@type: VideoObject` markup (name, description, thumbnailUrl, uploadDate, embedUrl) to JSON-LD — only when all required facts are collected and source-backed: the video URL/ID, title, description, accurate ISO-8601 `uploadDate` with timezone, and a unique crawlable thumbnail (plus `contentUrl` when applicable). Never invent media facts; users must be able to watch that specific video on the page. Validate with Rich Results Test and verify the thumbnail returns 200.
+### VideoObject and discovery verification (mode-gated)
+- `@type: VideoObject` (name, description, thumbnailUrl, uploadDate, embedUrl/contentUrl) is emitted only when all required facts are collected and source-backed: the video URL/ID, title, description, accurate ISO-8601 `uploadDate` with timezone, and a unique crawlable thumbnail. Never invent media facts; users must be able to watch that specific video on the page. Validate syntax with Rich Results Test and verify the thumbnail returns 200.
+- Reporting is gated by the chosen mode. Mode F: report `VideoObject` strictly as optional metadata — the page does not satisfy Google's discovery requirements, so no video-search benefit is claimed. Mode S: report it as discovery-supporting metadata only after the rendered-HTML check below passes.
+- Discovery evidence (Mode S): verify a video element (`<video>`/`<iframe>`/`<embed>`/`<object>`) is present in the RENDERED HTML — URL Inspection "rendered HTML" on the deployed page, or a headless rendered-DOM dump of the served page. JSON-LD syntax validity alone is NEVER evidence of discovery or feature eligibility. With Search Console access, the Video Indexing report is the follow-up evidence; without it, say so — never estimate.
 - Reference implementation: [video-facade.md](./video-facade.md)
 
 ## 10. TYPICAL BLOCKS WITHOUT SPEED LOSS

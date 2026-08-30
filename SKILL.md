@@ -42,7 +42,7 @@ Required before generating anything:
 - CTA and contacts (phone, form, messengers). When a form is requested, also collect its submission destination and method (a first-party endpoint or a documented form service — never invented), the consent/privacy text required for the collected personal data, and where submissions are stored and who owns them; with no destination, the form is omitted or explicitly stubbed (tech-spec §10 form submission contract).
 - A brand-approved favicon or explicit permission to create one — never invent a brand mark silently.
 - Approved source material and a claim owner for objective marketing facts (numbers, prices, qualifications, guarantees, comparisons, case studies) — without them such claims are omitted, never invented.
-- Whether images are provided; whether FAQ / reviews / video blocks are needed. For a video block collect source-backed facts: video URL/ID, title, description, accurate first-publication date/time with timezone, and a unique crawlable thumbnail (plus `contentUrl` when applicable). Never invent missing media facts.
+- Whether images are provided; whether FAQ / reviews / video blocks are needed. For a video block collect source-backed facts: video URL/ID, title, description, accurate first-publication date/time with timezone, and a unique crawlable thumbnail (plus `contentUrl` when applicable). Never invent missing media facts. Also collect the video mode with its trade-off stated: click-only facade (default — privacy/performance; the page will not satisfy Google's video discovery requirements and no video-search benefit is claimed) or SEO-discoverable (self-hosted `<video>` or a documented direct embed — required when video search traffic matters) (tech-spec §9).
 
 If domain or keywords are missing — ask first, do not invent them.
 
@@ -90,7 +90,7 @@ Build `index.html` strictly following [references/tech-spec.md](./references/tec
 
 Treat every brief value as untrusted: encode it for its exact output context (HTML text, attribute, URL, JSON-LD), allow-list URL schemes (reject `javascript:`/unexpected `data:`), escape `<` in serialized JSON-LD, and validate structured IDs (e.g. YouTube `^[A-Za-z0-9_-]{11}$`) before they reach any URL (tech-spec §13).
 
-For embedded YouTube video use the facade pattern only: rules in tech-spec §9, reference implementation in [references/video-facade.md](./references/video-facade.md). Maps follow the same facade rule (tech-spec §10): a local screenshot in the initial DOM, the iframe inserted only on explicit activation — never a native `loading="lazy"` map iframe. Reference: [references/map-facade.md](./references/map-facade.md).
+For embedded YouTube video use the facade pattern by default; the SEO-discoverable mode (self-hosted `<video>` or a documented direct embed) is an explicit brief choice with a disclosed trade-off, never a silent switch — rules and the Google discovery requirements in tech-spec §9, facade reference implementation in [references/video-facade.md](./references/video-facade.md). Maps follow the facade rule only (tech-spec §10): a local screenshot in the initial DOM, the iframe inserted only on explicit activation — never a native `loading="lazy"` map iframe. Reference: [references/map-facade.md](./references/map-facade.md).
 
 ### 3. Generate companion files
 - `robots.txt` at the site root with a fully qualified `Sitemap:` line, never blocking the canonical page or required media.
@@ -122,7 +122,7 @@ Briefly list:
 - Never use external JS/CSS libraries, external fonts, or SVG images (tech-spec §6).
 - Never reference a local asset that was never created: every `src`/`srcset`/preload/OG URL must resolve to a real file in the project folder; missing source images are requested from the user, not invented (OUTPUT contract).
 - Never emit a raw brief value into markup: context-encode everything, reject `javascript:`/unexpected `data:` URLs, and self-test generation with hostile values (quotes, `</script>`, event-handler payloads) (tech-spec §13).
-- Never load YouTube iframes, maps, chats, subscription popups, or cookie banners on first load (tech-spec §9, §10, §11).
+- Never load YouTube iframes, maps, chats, subscription popups, or cookie banners on first load (tech-spec §9, §10, §11) — the single documented exception is a brief-chosen SEO-discoverable video mode with a direct embed recorded as a first-load dependency (tech-spec §9 Mode S).
 - All content must exist in raw HTML — nothing rendered only by JS.
 - Absolute URLs in JSON-LD, canonical, and OG tags.
 - Total JS budget ≤ 15 KB, one file, `defer` before `</body>`.

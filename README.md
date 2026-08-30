@@ -95,13 +95,13 @@ seo-landing/
 
 - **Performance**: LCP < 2.5s, INP < 100ms, CLS < 0.1; critical CSS inlined, the rest loaded async; the LCP image loads eagerly with `fetchpriority="high"` (a responsive `imagesrcset`/`imagesizes` preload only when measurement shows a benefit)
 - **Images**: AVIF → WebP → JPEG via `<picture>`, `srcset`/`sizes`, `width`/`height`, `loading="lazy"` for below-the-fold images only (never on the LCP image), breakpoints 320–1920
-- **SEO**: title/description/canonical/robots, Open Graph, Twitter Card, JSON-LD (`WebSite`, `Organization`, `BreadcrumbList`, `FAQPage`, `VideoObject` — emitted only when fact-backed and eligible for the corresponding Google search feature)
+- **SEO**: title/description/canonical/robots, Open Graph, Twitter Card, JSON-LD (`WebSite`, `Organization`, `BreadcrumbList`, `FAQPage`, `VideoObject` — emitted only when fact-backed and reported per the chosen video mode, never as a guaranteed search feature)
 - **Accessibility**: WCAG 2.1 AA, contrast ≥ 4.5:1, keyboard navigation, `prefers-reduced-motion`
 - **Security**: `X-Content-Type-Options`, `X-Frame-Options`, `Permissions-Policy`, `Referrer-Policy`, per-page CSP, staged HSTS, HTTPS enforcement, `rel="noopener noreferrer"`
 - **Fonts**: system fonts only — no external fonts, no Google Fonts
 - **JS budget ≤ 15 KB** for the first load, one file with `defer`; deferred third-party widgets (when used) are consent-gated, excluded from the budget, and disclosed in the dependency manifest
 - **Forbidden**: external JS/CSS libraries, SVG images, synchronous scripts, iframes on first load
-- **Video & maps**: "facade" pattern only — the cover is a local responsive image (eager when it is the LCP/above the fold, lazy below the fold), the iframe loads only on click
+- **Video & maps**: "facade" pattern by default — the cover is a local responsive image (eager when it is the LCP/above the fold, lazy below the fold), the iframe loads only on click. Click-only video trades Google video discovery for pre-activation privacy/performance; an opt-in SEO-discoverable mode (self-hosted `<video>` or a documented direct embed) exists when video search matters (tech-spec §9). Maps remain facade-only.
 - **Common blocks without JS**: FAQ via `<details>`, slider via `scroll-snap`, modal via `<dialog>`
 - **Stop point**: before validation and the final report, the skill always asks the user to confirm the HTML version
 
